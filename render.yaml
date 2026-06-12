@@ -11,9 +11,9 @@ services:
       - key: PORT
         value: 3000
       - key: JWT_SECRET
-        generateValue: true
+        value: aurelius-bank-jwt-secret-key-production
       - key: SESSION_SECRET
-        generateValue: true
+        value: aurelius-bank-session-secret-key
       - key: ADMIN_EMAIL
         value: aureliusadmin@gmail.com
       - key: ADMIN_PASSWORD

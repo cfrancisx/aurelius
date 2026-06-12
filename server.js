@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session management
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'aurelius-bank-session-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
