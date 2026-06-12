@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-card h1 {
+            font-size: 1.75rem;
+            color: #1a1a2e;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        .badge-admin {
+            display: inline-block;
+            background: #FF6B35;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .auth-subtitle {
+            color: #666666;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E0E3E8;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            background: white;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-login:hover {
+            background: #E65100;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.2);
+        }
+
+        .btn-login:active {
+            transform: translateY(1px);
+        }
+
+        .error-message {
+            background: #FFEBEE;
+            color: #C62828;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #D32F2F;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #E8F5E9;
+            color: #2E7D32;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #00AA62;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        .loading-spinner.show {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E0E3E8;
+            font-size: 0.95rem;
+        }
+
+        .auth-link {
+            color: #FF6B35;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .auth-link:hover {
+            color: #E65100;
+            text-decoration: underline;
+        }
+
+        .security-note {
+            background: #F5F7FA;
+            border-left: 4px solid #FF6B35;
+            padding: 1rem;
+            margin-top: 2rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .security-note strong {
+            color: #FF6B35;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo">🔐</div>
+            <h1>Admin Portal</h1>
+            <div class="badge-admin">Administrator Access</div>
+            <p class="auth-subtitle">Secure Admin Dashboard</p>
+
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="email">Admin Email</label>
+                    <input type="email" id="email" required placeholder="admin@aureliusbank.com" autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <span class="loading-spinner" id="loading"></span>
+                    <span id="btnText">Sign In as Admin</span>
+                </button>
+            </form>
+
+            <div class="auth-links">
+                <span><a href="/login" class="auth-link">← Back to Customer Login</a></span>
+            </div>
+
+            <div class="security-note">
+                <strong>⚠️ Restricted Access:</strong> This portal is for authorized administrators only. All login attempts are monitored and logged.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const api = {
+            async request(endpoint, options = {}) {
+                const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+                const response = await fetch(endpoint, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { 'Authorization': `Bearer ${token}` }),
+                        ...options.headers,
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('token');
+                    window.location.href = '/admin-login';
+                }
+
+                return response;
+            },
+
+            async adminLogin(email, password) {
+                const response = await this.request('/auth/admin/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                return response.json();
+            }
+        };
+
+        const form = document.getElementById('adminLoginForm');
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+        const btnText = document.getElementById('btnText');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                errorDiv.textContent = 'Please enter your admin email and password';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            loading.classList.add('show');
+            btnText.textContent = 'Signing In...';
+            errorDiv.classList.remove('show');
+            successDiv.classList.remove('show');
+
+            try {
+                const result = await api.adminLogin(email, password);
+
+                if (result.error) {
+                    errorDiv.textContent = result.error;
+                    errorDiv.classList.add('show');
+                    loading.classList.remove('show');
+                    btnText.textContent = 'Sign In as Admin';
+                } else if (result.token) {
+                    localStorage.setItem('adminToken', result.token);
+                    localStorage.setItem('token', result.token);
+                    successDiv.textContent = 'Admin login successful! Redirecting to dashboard...';
+                    successDiv.classList.add('show');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 500);
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Login failed. Please check your credentials and try again.';
+                errorDiv.classList.add('show');
+                loading.classList.remove('show');
+                btnText.textContent = 'Sign In as Admin';
+            }
+        });
+    </script>
+</body>
+</html>

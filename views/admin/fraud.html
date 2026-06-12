@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Monitoring - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/fraud" class="active">🚨 Fraud Monitoring</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Fraud Monitoring</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="card">
+                <h3>Suspicious Activities</h3>
+                <p>Fraud detection system is monitoring all transactions for suspicious patterns.</p>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Account</th>
+                                <th>Activity Type</th>
+                                <th>Risk Score</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5">No suspicious activities detected</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

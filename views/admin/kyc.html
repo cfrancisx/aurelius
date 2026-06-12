@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc" class="active">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>KYC Verification</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="card">
+                <h3>Pending KYC Verification</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Account Number</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kycTable">
+                            <tr><td colspan="5">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const customers = await api.getCustomers();
+                const pendingKYC = customers.filter(c => c.kyc_status === 'pending');
+                const tbody = document.getElementById('kycTable');
+                tbody.innerHTML = pendingKYC.map(c => `
+                    <tr>
+                        <td>${c.first_name} ${c.last_name}</td>
+                        <td>${c.email}</td>
+                        <td>${c.account_number}</td>
+                        <td>${c.kyc_status}</td>
+                        <td>
+                            <button onclick="updateKYCStatus(${c.id}, 'verified')" class="btn-sm">Approve</button>
+                            <button onclick="updateKYCStatus(${c.id}, 'rejected')" class="btn-sm">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load KYC data', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Accounts - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">AURELIUS BANK</div>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard/overview">📊 Overview</a></li>
+                <li><a href="/dashboard/accounts" class="active">💳 Accounts</a></li>
+                <li><a href="/dashboard/transfers">💸 Transfers</a></li>
+                <li><a href="/dashboard/payments">📱 Payments</a></li>
+                <li><a href="/dashboard/cards">💳 Cards</a></li>
+                <li><a href="/dashboard/loans">🏦 Loans</a></li>
+                <li><a href="/dashboard/statements">📄 Statements</a></li>
+                <li><a href="/dashboard/support">💬 Support</a></li>
+                <li><a href="/dashboard/settings">⚙️ Settings</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>My Accounts</h1>
+            </header>
+            
+            <div id="accountsContainer" class="grid grid-2"></div>
+            
+            <div class="card">
+                <h3>Account Details</h3>
+                <div id="selectedAccountDetails"></div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const accounts = await api.getAccounts();
+            const container = document.getElementById('accountsContainer');
+            
+            container.innerHTML = accounts.map(account => `
+                <div class="account-card" onclick="showAccountDetails('${account.account_number}')">
+                    <div class="account-type">${account.currency} Account</div>
+                    <div class="account-number">${account.account_number}</div>
+                    <div class="balance">$${account.available_balance.toLocaleString()}</div>
+                    <div class="balance-label">Available Balance</div>
+                    <div class="ledger-balance">Ledger: $${account.ledger_balance.toLocaleString()}</div>
+                </div>
+            `).join('');
+        });
+        
+        async function showAccountDetails(accountNumber) {
+            const transactions = await api.getTransactions(accountNumber);
+            const container = document.getElementById('selectedAccountDetails');
+            
+            container.innerHTML = `
+                <h4>Transaction History for ${accountNumber}</h4>
+                <div class="transaction-table">
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>Reference</th><th>Narration</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            ${transactions.map(t => `
+                                <tr>
+                                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                                    <td>${t.reference}</td>
+                                    <td>${t.narration || '-'}</td>
+                                    <td class="${t.sender_account === accountNumber ? 'text-danger' : 'text-success'}">
+                                        ${t.sender_account === accountNumber ? '-' : '+'}£${t.amount.toLocaleString()}
+                                    </td>
+                                    <td><span class="badge badge-${t.status}">${t.status}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

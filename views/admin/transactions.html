@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions" class="active">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Transactions</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="card">
+                <h3>All Transactions</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Reference</th>
+                                <th>From Account</th>
+                                <th>To Account</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const transactions = await api.request('/admin/transactions');
+                const tbody = document.getElementById('transactionsTable');
+                tbody.innerHTML = transactions.map(t => `
+                    <tr>
+                        <td>${new Date(t.created_at).toLocaleString()}</td>
+                        <td>${t.reference}</td>
+                        <td>${t.sender_account}</td>
+                        <td>${t.receiver_account}</td>
+                        <td>$${parseFloat(t.amount).toFixed(2)}</td>
+                        <td><span class="badge badge-${t.status}">${t.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load transactions', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

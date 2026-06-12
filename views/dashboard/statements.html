@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statements - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">AURELIUS BANK</div>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard/overview">📊 Overview</a></li>
+                <li><a href="/dashboard/accounts">💳 Accounts</a></li>
+                <li><a href="/dashboard/transfers">💸 Transfers</a></li>
+                <li><a href="/dashboard/payments">📱 Payments</a></li>
+                <li><a href="/dashboard/cards">💳 Cards</a></li>
+                <li><a href="/dashboard/loans">🏦 Loans</a></li>
+                <li><a href="/dashboard/statements" class="active">📄 Statements</a></li>
+                <li><a href="/dashboard/support">💬 Support</a></li>
+                <li><a href="/dashboard/settings">⚙️ Settings</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Account Statements</h1>
+            </header>
+            
+            <div class="card">
+                <h3>Generate Statement</h3>
+                <form id="statementForm">
+                    <div class="form-group">
+                        <label>Select Account</label>
+                        <select id="accountSelect" class="form-control" required></select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" id="fromDate" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" id="toDate" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Generate Statement</button>
+                </form>
+            </div>
+            
+            <div id="statementResult" class="card" style="display: none;">
+                <div class="statement-header">
+                    <h3>Aurelius Bank - Account Statement</h3>
+                    <p id="statementPeriod"></p>
+                </div>
+                
+                <div class="statement-summary">
+                    <div>Opening Balance: <strong id="openingBalance">$0</strong></div>
+                    <div>Closing Balance: <strong id="closingBalance">$0</strong></div>
+                    <div>Total Credits: <strong id="totalCredits">$0</strong></div>
+                    <div>Total Debits: <strong id="totalDebits">$0</strong></div>
+                </div>
+                
+                <div class="transaction-table">
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>Description</th><th>Reference</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>
+                        </thead>
+                        <tbody id="statementTransactions"></tbody>
+                    </table>
+                </div>
+                
+                <button onclick="downloadStatement()" class="btn btn-outline">Download PDF</button>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        let currentStatement = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const accounts = await api.getAccounts();
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = accounts.map(acc => 
+                `<option value="${acc.account_number}">${acc.account_number} (£${acc.available_balance.toLocaleString()})</option>`
+            ).join('');
+            
+            // Set default dates (last 30 days)
+            const toDate = new Date();
+            const fromDate = new Date();
+            fromDate.setDate(fromDate.getDate() - 30);
+            
+            document.getElementById('fromDate').value = fromDate.toISOString().split('T')[0];
+            document.getElementById('toDate').value = toDate.toISOString().split('T')[0];
+        });
+        
+        document.getElementById('statementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const accountNumber = document.getElementById('accountSelect').value;
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            
+            const statement = await api.request(`/user/statement?account_number=${accountNumber}&from_date=${fromDate}&to_date=${toDate}`);
+            currentStatement = statement;
+            
+            displayStatement(statement);
+        });
+        
+        function displayStatement(statement) {
+            document.getElementById('statementResult').style.display = 'block';
+            document.getElementById('statementPeriod').textContent = `${statement.period.from_date} to ${statement.period.to_date}`;
+            
+            let runningBalance = statement.account.ledger_balance;
+            let totalCredits = 0;
+            let totalDebits = 0;
+            
+            const transactionsHtml = statement.transactions.map(t => {
+                const isCredit = t.receiver_account === statement.account.account_number;
+                const amount = t.amount;
+                
+                if (isCredit) {
+                    totalCredits += amount;
+                    runningBalance += amount;
+                } else {
+                    totalDebits += amount;
+                    runningBalance -= amount;
+                }
+                
+                return `
+                    <tr>
+                        <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                        <td>${t.narration || 'Transaction'}</td>
+                        <td>${t.reference}</td>
+                        <td class="${!isCredit ? 'text-danger' : ''}">£${!isCredit ? amount.toLocaleString() : '-'}</td>
+                        <td class="${isCredit ? 'text-success' : ''}">£${isCredit ? amount.toLocaleString() : '-'}</td>
+                        <td>£${runningBalance.toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('statementTransactions').innerHTML = transactionsHtml;
+            document.getElementById('openingBalance').textContent = `£${statement.account.ledger_balance.toLocaleString()}`;
+            document.getElementById('closingBalance').textContent = `£${runningBalance.toLocaleString()}`;
+            document.getElementById('totalCredits').textContent = `£${totalCredits.toLocaleString()}`;
+            document.getElementById('totalDebits').textContent = `$${totalDebits.toLocaleString()}`;
+        }
+        
+        function downloadStatement() {
+            if (!currentStatement) return;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Aurelius Bank Statement</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .summary { margin: 20px 0; padding: 10px; background: #f5f5f5; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                        .text-danger { color: red; }
+                        .text-success { color: green; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Aurelius Bank</h1>
+                        <p>Account Statement</p>
+                        <p>Account: ${currentStatement.account.account_number}</p>
+                        <p>Period: ${currentStatement.period.from_date} to ${currentStatement.period.to_date}</p>
+                    </div>
+                    <div class="summary">
+                        <p>Opening Balance: $${currentStatement.account.ledger_balance.toLocaleString()}</p>
+                        <p>Closing Balance: ${document.getElementById('closingBalance').innerHTML}</p>
+                        <p>Total Credits: ${document.getElementById('totalCredits').innerHTML}</p>
+                        <p>Total Debits: ${document.getElementById('totalDebits').innerHTML}</p>
+                    </div>
+                    <table>
+                        <thead><tr><th>Date</th><th>Description</th><th>Reference</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
+                        <tbody>${document.getElementById('statementTransactions').innerHTML}</tbody>
+                    </table>
+                    <p style="margin-top: 30px; text-align: center;">Generated on ${new Date().toLocaleString()}</p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+</body>
+</html>

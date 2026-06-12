@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Management - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .balance-header {
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 61, 130, 0.15);
+        }
+
+        .balance-header h1 {
+            color: white;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .action-buttons-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .action-button {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .action-button.credit {
+            border-top: 4px solid #00AA62;
+        }
+
+        .action-button.debit {
+            border-top: 4px solid #FF6B35;
+        }
+
+        .action-button.set {
+            border-top: 4px solid #7C3AED;
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .action-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .action-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid;
+        }
+
+        .stat-item.green { border-left-color: #00AA62; }
+        .stat-item.orange { border-left-color: #FF6B35; }
+        .stat-item.blue { border-left-color: #003D82; }
+
+        .stat-item-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF5 100%);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-section h3 {
+            margin-top: 0;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E0E3E8;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .search-box button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .modal-header h3 {
+            color: white;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .adjustment-item {
+            background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF5 100%);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid;
+        }
+
+        .adjustment-item.credit { border-left-color: #00AA62; }
+        .adjustment-item.debit { border-left-color: #FF6B35; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">🏦 AURELIUS</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management" class="active">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Balance Management</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="balance-header">
+                <h1>💰 Manage Customer Balances</h1>
+                <p>Credit, debit, or adjust account balances with full audit trail</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons-group">
+                <button onclick="showCreditModal()" class="action-button credit">
+                    <span class="action-icon">➕</span>
+                    <div class="action-label">Credit Account</div>
+                    <div class="action-desc">Add funds to account</div>
+                </button>
+                <button onclick="showDebitModal()" class="action-button debit">
+                    <span class="action-icon">➖</span>
+                    <div class="action-label">Debit Account</div>
+                    <div class="action-desc">Remove funds from account</div>
+                </button>
+                <button onclick="showSetBalanceModal()" class="action-button set">
+                    <span class="action-icon">⚙️</span>
+                    <div class="action-label">Set Balance</div>
+                    <div class="action-desc">Set exact balance amount</div>
+                </button>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-item green">
+                    <div class="stat-item-label">Total Credits Today</div>
+                    <div class="stat-item-value" id="totalCredits">0</div>
+                </div>
+                <div class="stat-item orange">
+                    <div class="stat-item-label">Total Debits Today</div>
+                    <div class="stat-item-value" id="totalDebits">0</div>
+                </div>
+                <div class="stat-item blue">
+                    <div class="stat-item-label">Adjustments</div>
+                    <div class="stat-item-value" id="totalAdjustments">0</div>
+                </div>
+            </div>
+
+            <!-- Search Customer -->
+            <div class="search-section">
+                <h3>🔍 Search Customer</h3>
+                <div class="search-box">
+                    <input type="text" id="customerSearch" placeholder="Search by account number or name..." class="form-control">
+                </div>
+                <div id="searchResults" style="margin-top: 1rem;"></div>
+            </div>
+            
+            <!-- Recent Adjustments -->
+            <div class="card">
+                <h3>📋 Recent Balance Adjustments</h3>
+                <div id="recentAdjustments" class="adjustments-list"></div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Credit Modal -->
+    <div id="creditModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Credit Account</h3>
+            </div>
+            <div class="modal-body">
+                <form id="creditForm">
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="creditAccount" class="form-control" required placeholder="Enter account number">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount to Credit</label>
+                        <input type="number" id="creditAmount" class="form-control" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea id="creditReason" class="form-control" required placeholder="Reason for credit"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Process Credit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Debit Modal -->
+    <div id="debitModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➖ Debit Account</h3>
+            </div>
+            <div class="modal-body">
+                <form id="debitForm">
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="debitAccount" class="form-control" required placeholder="Enter account number">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount to Debit</label>
+                        <input type="number" id="debitAmount" class="form-control" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea id="debitReason" class="form-control" required placeholder="Reason for debit"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Process Debit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Set Balance Modal -->
+    <div id="setBalanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ Set Exact Balance</h3>
+            </div>
+            <div class="modal-body">
+                <form id="setBalanceForm">
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="setBalanceAccount" class="form-control" required placeholder="Enter account number">
+                    </div>
+                    <div class="form-group">
+                        <label>New Balance Amount</label>
+                        <input type="number" id="newBalance" class="form-control" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea id="setBalanceReason" class="form-control" required placeholder="Reason for adjustment"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Set Balance</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>
+            
+            <!-- Balance Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Adjustments Today</h3>
+                    <div class="value" id="totalAdjustments">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Credits</h3>
+                    <div class="value" id="totalCredits">0</div>
+                    <small id="creditAmount">$0</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Debits</h3>
+                    <div class="value" id="totalDebits">0</div>
+                    <small id="debitAmount">$0</small>
+                </div>
+            </div>
+            
+            <!-- Balance Actions -->
+            <div class="card">
+                <h3>Balance Actions</h3>
+                <div class="grid grid-3">
+                    <button onclick="showCreditModal()" class="btn btn-primary">Credit Account</button>
+                    <button onclick="showDebitModal()" class="btn btn-warning">Debit Account</button>
+                    <button onclick="showSetBalanceModal()" class="btn btn-info">Set Exact Balance</button>
+                </div>
+            </div>
+            
+            <!-- Recent Adjustments -->
+            <div class="card">
+                <h3>Recent Balance Adjustments</h3>
+                <div id="recentAdjustments" class="adjustments-list"></div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Credit Modal -->
+    <div id="creditModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('creditModal')">&times;</span>
+            <h3>Credit Account</h3>
+            <form id="creditForm">
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="creditAccount" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="creditAmount" class="form-control" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="creditReason" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Process Credit</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Debit Modal -->
+    <div id="debitModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('debitModal')">&times;</span>
+            <h3>Debit Account</h3>
+            <form id="debitForm">
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="debitAccount" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="debitAmount" class="form-control" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="debitReason" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Process Debit</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Set Balance Modal -->
+    <div id="setBalanceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('setBalanceModal')">&times;</span>
+            <h3>Set Exact Balance</h3>
+            <form id="setBalanceForm">
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="setBalanceAccount" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>New Balance</label>
+                    <input type="number" id="newBalance" class="form-control" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="setBalanceReason" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Set Balance</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

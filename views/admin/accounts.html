@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/accounts" class="active">💳 Accounts</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Account Management</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="showCreateAccount()" class="btn btn-primary">+ New Account</button>
+                    <button onclick="logout()" class="btn btn-outline">Logout</button>
+                </div>
+            </header>
+            
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="accountSearch" placeholder="Search by account number or customer..." class="form-control">
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Customer</th>
+                                <th>Type</th>
+                                <th>Currency</th>
+                                <th>Available Balance</th>
+                                <th>Ledger Balance</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                             </tr>
+                        </thead>
+                        <tbody id="accountsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Create Account Modal -->
+    <div id="createAccountModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Create New Account</h3>
+            <form id="createAccountForm">
+                <div class="form-group">
+                    <label>Customer ID</label>
+                    <input type="number" id="customerId" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Currency</label>
+                    <select id="currency" class="form-control">
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Initial Deposit</label>
+                    <input type="number" id="initialDeposit" class="form-control" step="0.01" value="0">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAccounts();
+            
+            document.getElementById('accountSearch').addEventListener('input', debounce(() => {
+                loadAccounts();
+            }, 500));
+        });
+        
+        async function loadAccounts() {
+            const search = document.getElementById('accountSearch').value;
+            const accounts = await api.getAccounts();
+            const customers = await api.getCustomers();
+            
+            const accountList = [];
+            for (const account of accounts) {
+                const customer = customers.find(c => c.id === account.user_id);
+                if (customer && (!search || 
+                    account.account_number.includes(search) || 
+                    customer.first_name.toLowerCase().includes(search.toLowerCase()) ||
+                    customer.last_name.toLowerCase().includes(search.toLowerCase()))) {
+                    accountList.push({ ...account, customer });
+                }
+            }
+            
+            const tbody = document.getElementById('accountsTable');
+            tbody.innerHTML = accountList.map(account => `
+                <tr>
+                    <td>${account.account_number}</td>
+                    <td>${account.customer.first_name} ${account.customer.last_name}</td>
+                    <td>${account.customer.account_type}</td>
+                    <td>${account.currency}</td>
+                    <td>£${account.available_balance.toLocaleString()}</td>
+                    <td>£${account.ledger_balance.toLocaleString()}</td>
+                    <td><span class="badge badge-${account.status}">${account.status}</span></td>
+                    <td>${new Date(account.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="viewAccount('${account.account_number}')" class="btn-sm">View</button>
+                        <button onclick="toggleAccountStatus(${account.id}, '${account.status}')" class="btn-sm">${account.status === 'active' ? 'Freeze' : 'Activate'}</button>
+                     </td>
+                </tr>
+            `).join('');
+        }
+        
+        function showCreateAccount() {
+            document.getElementById('createAccountModal').style.display = 'block';
+        }
+        
+        document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                customer_id: parseInt(document.getElementById('customerId').value),
+                currency: document.getElementById('currency').value,
+                initial_deposit: parseFloat(document.getElementById('initialDeposit').value)
+            };
+            
+            await fetch('/api/admin/accounts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(data)
+            });
+            
+            closeModal();
+            loadAccounts();
+        });
+        
+        async function viewAccount(accountNumber) {
+            const transactions = await api.getTransactions(accountNumber);
+            const accounts = await api.getAccounts();
+            const account = accounts.find(a => a.account_number === accountNumber);
+            
+            const modalContent = `
+                <div class="modal-content modal-large">
+                    <span class="close" onclick="this.parentElement.parentElement.style.display='none'">&times;</span>
+                    <h3>Account Details: ${accountNumber}</h3>
+                    <div class="grid grid-2">
+                        <div>
+                            <p><strong>Balance:</strong> £${account.available_balance.toLocaleString()}</p>
+                            <p><strong>Ledger Balance:</strong> £${account.ledger_balance.toLocaleString()}</p>
+                            <p><strong>Currency:</strong> ${account.currency}</p>
+                            <p><strong>Status:</strong> ${account.status}</p>
+                        </div>
+                        <div>
+                            <h4>Recent Transactions</h4>
+                            <div class="transaction-list">
+                                ${transactions.slice(0, 10).map(t => `
+                                    <div class="transaction-item">
+                                        ${new Date(t.created_at).toLocaleString()} - 
+                                        £${t.amount.toLocaleString()} - 
+                                        ${t.transaction_type} - 
+                                        ${t.status}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = modalContent;
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.close').onclick = () => modal.remove();
+        }
+        
+        async function toggleAccountStatus(accountId, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'frozen' : 'active';
+            
+            await fetch(`/api/admin/accounts/${accountId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            loadAccounts();
+        }
+        
+        function closeModal() {
+            document.getElementById('createAccountModal').style.display = 'none';
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>

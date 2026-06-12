@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Banking - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><span>⟡</span> Aurelius Bank</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/personal" class="active">Personal</a>
+                <a href="/business">Business</a>
+                <a href="/login" class="btn-primary">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Personal Banking Solutions</h1>
+                <p>Banking made simple, secure, and seamless for you</p>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container">
+                <h2>Our Personal Banking Services</h2>
+                
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">💳</div>
+                        <h3>Savings Accounts</h3>
+                        <p>Grow your savings with competitive interest rates and flexible withdrawal options</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">💰</div>
+                        <h3>Current Accounts</h3>
+                        <p>Unlimited transactions with no minimum balance requirement for daily banking</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🎁</div>
+                        <h3>Rewards Program</h3>
+                        <p>Earn points on every transaction and redeem exclusive rewards</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">📊</div>
+                        <h3>Investment Plans</h3>
+                        <p>Build wealth with our range of investment products and financial planning services</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🏠</div>
+                        <h3>Home Loans</h3>
+                        <p>Achieve your dream home with our competitive home loan packages</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🚗</div>
+                        <h3>Auto Loans</h3>
+                        <p>Drive your dream car with flexible auto loan options</p>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 3rem;">Why Choose Personal Banking with Aurelius?</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li>✓ 24/7 mobile banking access from anywhere</li>
+                    <li>✓ Secure transactions with military-grade encryption</li>
+                    <li>✓ Fast fund transfers to other banks</li>
+                    <li>✓ Bill payment and utility services</li>
+                    <li>✓ Dedicated relationship managers</li>
+                </ul>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="/register" class="btn-primary">Open Account Today</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Aurelius Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content {
+            padding: 4rem 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            background: var(--primary);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00297a;
+        }
+    </style>
+</body>
+</html>

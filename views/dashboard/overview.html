@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Overview - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF5 100%);
+        }
+
+        .dashboard-sidebar {
+            background: linear-gradient(180deg, #003D82 0%, #002B5C 100%);
+            color: white;
+        }
+
+        .dashboard-sidebar .logo {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-nav a {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .dashboard-nav a:hover,
+        .dashboard-nav a.active {
+            background: rgba(0, 170, 98, 0.2);
+            color: white;
+            border-left-color: #00AA62;
+        }
+
+        .dashboard-main {
+            background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF5 100%);
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 61, 130, 0.15);
+        }
+
+        .welcome-banner h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-banner p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .quick-stat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .quick-stat.green { border-top-color: #00AA62; }
+        .quick-stat.orange { border-top-color: #FF6B35; }
+        .quick-stat.purple { border-top-color: #7C3AED; }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .action-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .account-card {
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 61, 130, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .account-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 61, 130, 0.2);
+        }
+
+        .account-card.secondary {
+            background: linear-gradient(135deg, #00AA62 0%, #00D966 100%);
+        }
+
+        .account-type {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .account-number {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .account-balance {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .transactions-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .transactions-card h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF5 100%);
+            border-radius: 0.75rem;
+            transition: background 0.2s ease;
+        }
+
+        .transaction-item:hover {
+            background: linear-gradient(135deg, #E8EEF5 0%, #D8E0ED 100%);
+        }
+
+        .transaction-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .transaction-desc {
+            flex: 1;
+        }
+
+        .transaction-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .transaction-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .amount-credit {
+            color: #00AA62;
+        }
+
+        .amount-debit {
+            color: #FF6B35;
+        }
+
+        @media (max-width: 768px) {
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <div class="logo">🏦 AURELIUS</div>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/overview" class="active">📊 Overview</a>
+                <a href="/dashboard/accounts">💳 Accounts</a>
+                <a href="/dashboard/transfers">💸 Transfers</a>
+                <a href="/dashboard/payments">📱 Payments</a>
+                <a href="/dashboard/cards">💳 Cards</a>
+                <a href="/dashboard/loans">🏦 Loans</a>
+                <a href="/dashboard/statements">📄 Statements</a>
+                <a href="/dashboard/support">💬 Support</a>
+                <a href="/dashboard/settings">⚙️ Settings</a>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <h1>Welcome back, <span id="userName">Customer</span> 👋</h1>
+                <button id="logoutBtn" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="welcome-banner">
+                <h3>Your Financial Overview</h3>
+                <p>Total Net Worth: <strong id="totalNetWorth">£0</strong></p>
+            </div>
+
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <div class="stat-label">💰 Savings</div>
+                    <div class="stat-value">£0</div>
+                </div>
+                <div class="quick-stat green">
+                    <div class="stat-label">📈 Investments</div>
+                    <div class="stat-value">£0</div>
+                </div>
+                <div class="quick-stat orange">
+                    <div class="stat-label">💳 Spending</div>
+                    <div class="stat-value">£0</div>
+                </div>
+                <div class="quick-stat purple">
+                    <div class="stat-label">🎯 Goals</div>
+                    <div class="stat-value">£0</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="action-card" onclick="window.location.href='/dashboard/transfers'">
+                    <span class="action-icon">💸</span>
+                    <span class="action-label">Send Money</span>
+                </div>
+                <div class="action-card" onclick="window.location.href='/dashboard/payments'">
+                    <span class="action-icon">📱</span>
+                    <span class="action-label">Pay Bills</span>
+                </div>
+                <div class="action-card" onclick="window.location.href='/dashboard/statements'">
+                    <span class="action-icon">📄</span>
+                    <span class="action-label">View Statements</span>
+                </div>
+                <div class="action-card" onclick="window.location.href='/dashboard/support'">
+                    <span class="action-icon">💬</span>
+                    <span class="action-label">Contact Support</span>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">📊 Your Accounts</h2>
+            
+            <div id="accountsGrid"></div>
+
+            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">💳 Recent Transactions</h2>
+            
+            <div class="transactions-card">
+                <div class="transaction-list" id="transactionsList">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                        Loading transactions...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Setup logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+
+            try {
+                const accounts = await api.getAccounts();
+                const userName = localStorage.getItem('userName') || 'Customer';
+                document.getElementById('userName').textContent = userName;
+
+                let totalBalance = 0;
+                let accountsHTML = '';
+
+                accounts.forEach((acc, idx) => {
+                    totalBalance += parseFloat(acc.available_balance) || 0;
+                    const accountClass = idx % 2 === 0 ? '' : 'secondary';
+                    const balance = parseFloat(acc.available_balance || 0).toFixed(2);
+                    
+                    accountsHTML += `
+                        <div class="account-card ${accountClass}">
+                            <div class="account-type">${acc.account_type || 'Current Account'}</div>
+                            <div class="account-number">Account: ${acc.account_number}</div>
+                            <div class="account-balance">£${balance}</div>
+                            <button class="btn" onclick="window.location.href='/dashboard/accounts'" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">View Details</button>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('accountsGrid').innerHTML = accountsHTML;
+                document.getElementById('totalNetWorth').textContent = '£' + totalBalance.toFixed(2);
+
+                // Load transactions
+                const txns = await api.getTransactions();
+                let txnHTML = '';
+                
+                if (txns && txns.length > 0) {
+                    txns.slice(0, 5).forEach(txn => {
+                        const date = new Date(txn.created_at).toLocaleDateString();
+                        const amount = parseFloat(txn.amount || 0).toFixed(2);
+                        const isCredit = txn.sender_account !== localStorage.getItem('accountNumber');
+                        
+                        txnHTML += `
+                            <div class="transaction-item">
+                                <div class="transaction-icon">${isCredit ? '📥' : '📤'}</div>
+                                <div class="transaction-desc">
+                                    <div class="transaction-name">${txn.transaction_type || 'Transaction'}</div>
+                                    <div class="transaction-date">${date}</div>
+                                </div>
+                                <div class="transaction-amount ${isCredit ? 'amount-credit' : 'amount-debit'}">
+                                    ${isCredit ? '+' : '-'}£${amount}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    txnHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No transactions yet</div>';
+                }
+                
+                document.getElementById('transactionsList').innerHTML = txnHTML;
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+                <div class="card">
+                    <h3>Recent Transactions</h3>
+                    <div class="transaction-table">
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="transactionsList"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Spending Overview</h3>
+                    <canvas id="spendingChart" height="250"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

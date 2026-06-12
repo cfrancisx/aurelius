@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Money - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">AURELIUS BANK</div>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard/overview">📊 Overview</a></li>
+                <li><a href="/dashboard/accounts">💳 Accounts</a></li>
+                <li><a href="/dashboard/transfers" class="active">💸 Transfers</a></li>
+                <li><a href="/dashboard/payments">📱 Payments</a></li>
+                <li><a href="/dashboard/cards">💳 Cards</a></li>
+                <li><a href="/dashboard/loans">🏦 Loans</a></li>
+                <li><a href="/dashboard/statements">📄 Statements</a></li>
+                <li><a href="/dashboard/support">💬 Support</a></li>
+                <li><a href="/dashboard/settings">⚙️ Settings</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Transfer Money</h1>
+            </header>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>New Transfer</h3>
+                    <form id="transferForm" class="transfer-form">
+                        <div class="form-group">
+                            <label>From Account</label>
+                            <select id="fromAccount" class="form-control" required></select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>To Account Number</label>
+                            <input type="text" id="receiverAccount" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="amount" class="form-control" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Reference/Narration</label>
+                            <input type="text" id="narration" class="form-control" placeholder="Optional">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">Send Money</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3>Beneficiaries</h3>
+                    <div id="beneficiariesList"></div>
+                    <button onclick="showAddBeneficiary()" class="btn btn-outline btn-block">Add Beneficiary</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Recent Transfers</h3>
+                <div class="transaction-table">
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>To Account</th><th>Amount</th><th>Reference</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="recentTransfers"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Beneficiary Modal -->
+    <div id="beneficiaryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Add Beneficiary</h3>
+            <form id="beneficiaryForm">
+                <div class="form-group">
+                    <label>Beneficiary Name</label>
+                    <input type="text" id="beneficiaryName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <input type="text" id="bankName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="beneficiaryAccount" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Beneficiary</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        let accounts = [];
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            accounts = await api.getAccounts();
+            const fromAccountSelect = document.getElementById('fromAccount');
+            fromAccountSelect.innerHTML = accounts.map(acc => 
+                `<option value="${acc.account_number}">${acc.account_number} ($${acc.available_balance.toLocaleString()})</option>`
+            ).join('');
+            
+            loadBeneficiaries();
+            loadRecentTransfers();
+        });
+        
+        document.getElementById('transferForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const transferData = {
+                receiver_account: document.getElementById('receiverAccount').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                narration: document.getElementById('narration').value
+            };
+            
+            try {
+                const result = await api.transfer(transferData);
+                alert('Transfer completed successfully!');
+                location.reload();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+        
+        async function loadBeneficiaries() {
+            const beneficiaries = await api.getBeneficiaries();
+            const container = document.getElementById('beneficiariesList');
+            
+            container.innerHTML = beneficiaries.map(b => `
+                <div class="beneficiary-item" onclick="selectBeneficiary('${b.account_number}')">
+                    <div><strong>${b.beneficiary_name}</strong></div>
+                    <div>${b.bank_name}</div>
+                    <div>${b.account_number}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function loadRecentTransfers() {
+            const account = accounts[0];
+            if (account) {
+                const transactions = await api.getTransactions(account.account_number);
+                const transfers = transactions.filter(t => t.transaction_type === 'transfer').slice(0, 10);
+                const container = document.getElementById('recentTransfers');
+                
+                container.innerHTML = transfers.map(t => `
+                    <tr>
+                        <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                        <td>${t.receiver_account}</td>
+                        <td>$${t.amount.toLocaleString()}</td>
+                        <td>${t.narration || '-'}</td>
+                        <td><span class="badge badge-${t.status}">${t.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        function selectBeneficiary(accountNumber) {
+            document.getElementById('receiverAccount').value = accountNumber;
+        }
+        
+        function showAddBeneficiary() {
+            document.getElementById('beneficiaryModal').style.display = 'block';
+        }
+        
+        document.getElementById('beneficiaryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                beneficiary_name: document.getElementById('beneficiaryName').value,
+                bank_name: document.getElementById('bankName').value,
+                account_number: document.getElementById('beneficiaryAccount').value
+            };
+            
+            await api.addBeneficiary(data);
+            closeModal();
+            loadBeneficiaries();
+        });
+        
+        function closeModal() {
+            document.getElementById('beneficiaryModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

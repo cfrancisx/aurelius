@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs" class="active">📝 Audit Logs</a>
+                <a href="/admin/fraud">🚨 Fraud Monitoring</a>
+                <a href="/admin/reports">📊 Reports</a>
+                <a href="/admin/settings">⚙️ Settings</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Audit Logs</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="searchLogs" placeholder="Search logs..." class="form-control">
+                </div>
+                        <option value="">All Actions</option>
+                        <option value="user_login">User Login</option>
+                        <option value="user_registered">User Registered</option>
+                        <option value="transfer_made">Transfer Made</option>
+                        <option value="balance_credited">Balance Credited</option>
+                        <option value="balance_debited">Balance Debited</option>
+                        <option value="kyc_approved">KYC Approved</option>
+                        <option value="loan_approved">Loan Approved</option>
+                        <option value="admin_login">Admin Login</option>
+                    </select>
+                    
+                    <input type="date" id="dateFrom" placeholder="From Date">
+                    <input type="date" id="dateTo" placeholder="To Date">
+                    
+                    <button onclick="applyFilters()" class="btn btn-primary">Apply Filters</button>
+                    <button onclick="exportLogs()" class="btn btn-outline">Export CSV</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Admin</th>
+                                <th>IP Address</th>
+                                <th>Details</th>
+                             </tr>
+                        </thead>
+                        <tbody id="auditLogsTable"></tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="pagination"></div>
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4>Today's Activity</h4>
+                    <div class="value" id="todayCount">0</div>
+                </div>
+                <div class="card">
+                    <h4>This Week</h4>
+                    <div class="value" id="weekCount">0</div>
+                </div>
+                <div class="card">
+                    <h4>This Month</h4>
+                    <div class="value" id="monthCount">0</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        let currentPage = 1;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAuditLogs();
+            loadStats();
+        });
+        
+        async function loadAuditLogs() {
+            const logs = await api.getAuditLogs();
+            const tbody = document.getElementById('auditLogsTable');
+            
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td><span class="badge">${log.action}</span></td>
+                    <td>${log.user_email || 'System'}</td>
+                    <td>${log.admin_username || 'N/A'}</td>
+                    <td>${log.ip_address || 'N/A'}</td>
+                    <td>${log.details || '-'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function loadStats() {
+            const logs = await api.getAuditLogs();
+            const today = new Date().toISOString().split('T')[0];
+            const thisWeek = new Date();
+            thisWeek.setDate(thisWeek.getDate() - 7);
+            const thisMonth = new Date();
+            thisMonth.setDate(thisMonth.getDate() - 30);
+            
+            const todayCount = logs.filter(l => l.timestamp.startsWith(today)).length;
+            const weekCount = logs.filter(l => new Date(l.timestamp) > thisWeek).length;
+            const monthCount = logs.filter(l => new Date(l.timestamp) > thisMonth).length;
+            
+            document.getElementById('todayCount').textContent = todayCount;
+            document.getElementById('weekCount').textContent = weekCount;
+            document.getElementById('monthCount').textContent = monthCount;
+        }
+        
+        function applyFilters() {
+            const action = document.getElementById('actionFilter').value;
+            const fromDate = document.getElementById('dateFrom').value;
+            const toDate = document.getElementById('dateTo').value;
+            const search = document.getElementById('searchLogs').value;
+            
+            // Filter logic would go here
+            loadAuditLogs();
+        }
+        
+        function exportLogs() {
+            // Export to CSV
+            const table = document.querySelector('.data-table');
+            const rows = table.querySelectorAll('tr');
+            let csv = [];
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                const rowData = Array.from(cells).map(cell => cell.textContent);
+                csv.push(rowData.join(','));
+            });
+            
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit-logs-${new Date().toISOString()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

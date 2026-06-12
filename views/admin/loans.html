@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Approval - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers">👥 Customers</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans" class="active">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Loan Applications</h1>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </header>
+            
+            <div class="card">
+                <h3>Pending Loan Applications</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Amount</th>
+                                <th>Interest Rate</th>
+                                <th>Term (Months)</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loansTable">
+                            <tr><td colspan="7">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await api.request('/admin/loans');
+                const tbody = document.getElementById('loansTable');
+                tbody.innerHTML = response.map(loan => `
+                    <tr>
+                        <td>${loan.customer_name}</td>
+                        <td>$${parseFloat(loan.amount).toFixed(2)}</td>
+                        <td>${loan.interest_rate}%</td>
+                        <td>${loan.repayment_period}</td>
+                        <td><span class="badge badge-${loan.status}">${loan.status}</span></td>
+                        <td>${new Date(loan.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button onclick="approveLoan(${loan.id})" class="btn-sm">Approve</button>
+                            <button onclick="rejectLoan(${loan.id})" class="btn-sm">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load loans', 'error');
+            }
+        });
+        
+        async function approveLoan(loanId) {
+            try {
+                await api.request(`/admin/loans/${loanId}/approve`, { method: 'PUT' });
+                showToast('Loan approved successfully', 'success');
+                location.reload();
+            } catch (error) {
+                showToast('Failed to approve loan', 'error');
+            }
+        }
+        
+        async function rejectLoan(loanId) {
+            try {
+                await api.request(`/admin/loans/${loanId}/reject`, { method: 'PUT' });
+                showToast('Loan rejected successfully', 'success');
+                location.reload();
+            } catch (error) {
+                showToast('Failed to reject loan', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

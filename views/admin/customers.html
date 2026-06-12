@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - Aurelius Bank Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo">AURELIUS ADMIN</div>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/customers" class="active">👥 Customers</a>
+                <a href="/admin/accounts">💳 Accounts</a>
+                <a href="/admin/transactions">💰 Transactions</a>
+                <a href="/admin/balance-management">⚖️ Balance Management</a>
+                <a href="/admin/kyc">✅ KYC Verification</a>
+                <a href="/admin/loans">🏦 Loan Approval</a>
+                <a href="/admin/audit-logs">📝 Audit Logs</a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>Customer Management</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="exportCustomers()" class="btn btn-outline">Export CSV</button>
+                    <button onclick="logout()" class="btn btn-outline">Logout</button>
+                </div>
+            </header>
+            
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="customerSearch" placeholder="Search by name, email, or account number..." class="form-control">
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th>KYC</th>
+                                <th>Actions</th>
+                             </tr>
+                        </thead>
+                        <tbody id="customersTable"></tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="pagination"></div>
+            </div>
+            
+            <!-- Customer Details Modal -->
+            <div id="customerModal" class="modal">
+                <div class="modal-content modal-large">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <div id="customerDetails"></div>
+                </div>
+            </div>
+            
+            <!-- Freeze/Unfreeze Modal -->
+            <div id="statusModal" class="modal">
+                <div class="modal-content">
+                    <h3>Update Account Status</h3>
+                    <form id="statusForm">
+                        <input type="hidden" id="statusCustomerId">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="newStatus" class="form-control" required>
+                                <option value="active">Active</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="frozen">Frozen</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Reason</label>
+                            <textarea id="statusReason" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script>
+        let currentPage = 1;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCustomers();
+            
+            document.getElementById('customerSearch').addEventListener('input', debounce(() => {
+                currentPage = 1;
+                loadCustomers();
+            }, 500));
+        });
+        
+        async function loadCustomers() {
+            const search = document.getElementById('customerSearch').value;
+            const customers = await api.getCustomers();
+            const filtered = customers.filter(c => 
+                c.first_name.toLowerCase().includes(search.toLowerCase()) ||
+                c.last_name.toLowerCase().includes(search.toLowerCase()) ||
+                c.email.toLowerCase().includes(search.toLowerCase()) ||
+                c.account_number.includes(search)
+            );
+            
+            const tbody = document.getElementById('customersTable');
+            tbody.innerHTML = filtered.map(customer => `
+                <tr>
+                    <td>${customer.account_number}</td>
+                    <td>${customer.first_name} ${customer.last_name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>£${(customer.available_balance || 0).toLocaleString()}</td>
+                    <td><span class="badge badge-${customer.account_status}">${customer.account_status}</span></td>
+                    <td><span class="badge badge-${customer.kyc_status}">${customer.kyc_status}</span></td>
+                    <td>
+                        <button onclick="viewCustomer(${customer.id})" class="btn-sm">View</button>
+                        <button onclick="manageStatus(${customer.id}, '${customer.account_status}')" class="btn-sm">Status</button>
+                        <button onclick="manageBalance(${customer.id})" class="btn-sm">Balance</button>
+                     </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function viewCustomer(id) {
+            const response = await fetch(`/api/admin/customers/${id}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            const customer = await response.json();
+            
+            const modalContent = document.getElementById('customerDetails');
+            modalContent.innerHTML = `
+                <h3>Customer Details</h3>
+                <div class="grid grid-2">
+                    <div>
+                        <p><strong>Name:</strong> ${customer.customer.first_name} ${customer.customer.last_name}</p>
+                        <p><strong>Email:</strong> ${customer.customer.email}</p>
+                        <p><strong>Phone:</strong> ${customer.customer.phone}</p>
+                        <p><strong>Account Number:</strong> ${customer.customer.account_number}</p>
+                        <p><strong>Account Type:</strong> ${customer.customer.account_type}</p>
+                        <p><strong>Status:</strong> <span class="badge badge-${customer.customer.account_status}">${customer.customer.account_status}</span></p>
+                        <p><strong>KYC Status:</strong> <span class="badge badge-${customer.customer.kyc_status}">${customer.customer.kyc_status}</span></p>
+                        <p><strong>Joined:</strong> ${new Date(customer.customer.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                        <h4>Accounts</h4>
+                        ${customer.accounts.map(acc => `
+                            <div class="account-summary">
+                                <p>Account: ${acc.account_number}</p>
+                                <p>Balance: £${acc.available_balance.toLocaleString()}</p>
+                                <p>Currency: ${acc.currency}</p>
+                            </div>
+                        `).join('')}
+                        
+                        <h4>Recent Transactions</h4>
+                        <div class="transaction-list">
+                            ${customer.transactions.slice(0, 5).map(t => `
+                                <div class="transaction-item">
+                                    ${new Date(t.created_at).toLocaleDateString()} - 
+                                    £${t.amount.toLocaleString()} - 
+                                    ${t.transaction_type}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('customerModal').style.display = 'block';
+        }
+        
+        function manageStatus(id, currentStatus) {
+            document.getElementById('statusCustomerId').value = id;
+            document.getElementById('newStatus').value = currentStatus;
+            document.getElementById('statusModal').style.display = 'block';
+        }
+        
+        document.getElementById('statusForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('statusCustomerId').value;
+            const status = document.getElementById('newStatus').value;
+            const reason = document.getElementById('statusReason').value;
+            
+            await fetch(`/api/admin/customers/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ status, reason })
+            });
+            
+            closeModal();
+            loadCustomers();
+        });
+        
+        function manageBalance(customerId) {
+            window.location.href = `/admin/balance-management?customer=${customerId}`;
+        }
+        
+        function exportCustomers() {
+            const rows = document.querySelectorAll('#customersTable tr');
+            let csv = [];
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = Array.from(cells).map(cell => cell.textContent);
+                csv.push(rowData.join(','));
+            });
+            
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `customers-${new Date().toISOString()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function closeModal() {
+            document.getElementById('customerModal').style.display = 'none';
+            document.getElementById('statusModal').style.display = 'none';
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>
