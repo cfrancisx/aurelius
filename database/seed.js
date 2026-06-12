@@ -4,16 +4,23 @@ const bcrypt = require('bcryptjs');
 async function seedDatabase() {
     const db = await initDatabase();
     
-    // Delete existing admins to allow credential updates
-    await db.run('DELETE FROM admins');
-    
-    // Create admin with current credentials from environment
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Admin@123456', 10);
-    await db.run(
-        'INSERT INTO admins (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-        ['superadmin', process.env.ADMIN_EMAIL || 'admin@aureliusbank.com', hashedPassword, 'superadmin']
-    );
-    console.log('✅ Admin user created');
+    try {
+        // Delete existing admins to allow credential updates
+        await db.run('DELETE FROM admins');
+        
+        // Create admin with current credentials from environment
+        const adminEmail = process.env.ADMIN_EMAIL || 'aureliusadmin@gmail.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin12345';
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        
+        await db.run(
+            'INSERT INTO admins (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
+            ['superadmin', adminEmail, hashedPassword, 'superadmin']
+        );
+        console.log(`✅ Admin user created: ${adminEmail}`);
+    } catch (error) {
+        console.error('❌ Error creating admin:', error.message);
+    }
 
     // Create sample users
     const sampleUsers = [
