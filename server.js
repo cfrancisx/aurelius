@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
+const MongoStore = require('connect-mongo').default;
 const dotenv = require('dotenv');
 const { connectDatabase } = require('./database/mongodb');
 const { seedMongoDB } = require('./database/mongoSeed');
@@ -40,11 +41,15 @@ app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session management
+// Session management with MongoDB Store
 app.use(session({
     secret: process.env.SESSION_SECRET || 'aurelius-bank-session-secret-key',
     resave: false,
     saveUninitialized: false,
+    store: new MongoStore({
+        mongoUrl: process.env.MONGODB_URI,
+        touchAfter: 24 * 3600 // lazy session update interval (24 hours)
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
