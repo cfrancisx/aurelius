@@ -1,0 +1,62 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="400" fill="#F5F7FA"/>
+  
+  <!-- Head -->
+  <circle cx="150" cy="100" r="50" fill="#E8C4A0"/>
+  
+  <!-- Hair (sleek, dark) -->
+  <path d="M 100 70 Q 100 30 150 30 Q 200 30 200 70 Q 200 85 195 105 Q 150 118 105 105 Q 100 85 100 70" fill="#1A0F0A"/>
+  
+  <!-- Hair bun accent -->
+  <circle cx="150" cy="35" r="20" fill="#1A0F0A"/>
+  
+  <!-- Ears -->
+  <ellipse cx="93" cy="100" rx="11" ry="24" fill="#E8C4A0"/>
+  <ellipse cx="207" cy="100" rx="11" ry="24" fill="#E8C4A0"/>
+  
+  <!-- Eyes (with eyeliner) -->
+  <ellipse cx="130" cy="93" rx="6" ry="7" fill="#3D2817"/>
+  <ellipse cx="170" cy="93" rx="6" ry="7" fill="#3D2817"/>
+  <circle cx="132" cy="91" r="2.5" fill="white"/>
+  <circle cx="172" cy="91" r="2.5" fill="white"/>
+  
+  <!-- Eyeliner -->
+  <path d="M 124 93 Q 130 91 136 93" stroke="#1A0F0A" stroke-width="1" fill="none"/>
+  <path d="M 164 93 Q 170 91 176 93" stroke="#1A0F0A" stroke-width="1" fill="none"/>
+  
+  <!-- Eyebrows -->
+  <path d="M 119 78 Q 130 72 141 78" stroke="#1A0F0A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 159 78 Q 170 72 181 78" stroke="#1A0F0A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <line x1="150" y1="88" x2="150" y2="108" stroke="#D4A574" stroke-width="2"/>
+  
+  <!-- Mouth (professional smile) -->
+  <path d="M 135 124 Q 150 133 165 124" stroke="#C85A54" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Professional Jacket (Charcoal) -->
+  <rect x="80" y="160" width="140" height="160" rx="20" fill="#36454F"/>
+  
+  <!-- Cream/Beige Top -->
+  <rect x="100" y="160" width="100" height="95" fill="#F0E5D8"/>
+  
+  <!-- Scarf/Collar Detail -->
+  <path d="M 120 165 L 130 175 L 125 185" fill="#FF6B9D" opacity="0.8"/>
+  <path d="M 180 165 L 170 175 L 175 185" fill="#FF6B9D" opacity="0.8"/>
+  
+  <!-- Jacket lapels -->
+  <polygon points="125,165 95,200 125,190" fill="#2A3438"/>
+  <polygon points="175,165 205,200 175,190" fill="#2A3438"/>
+  
+  <!-- Arms -->
+  <rect x="45" y="185" width="35" height="105" rx="18" fill="#E8C4A0"/>
+  <rect x="220" y="185" width="35" height="105" rx="18" fill="#E8C4A0"/>
+  
+  <!-- Hands (professional gesture) -->
+  <circle cx="62" cy="295" r="17" fill="#E8C4A0"/>
+  <circle cx="238" cy="295" r="17" fill="#E8C4A0"/>
+  
+  <!-- Ring accent -->
+  <circle cx="70" cy="295" r="4" fill="#FFD700" opacity="0.7"/>
+</svg>

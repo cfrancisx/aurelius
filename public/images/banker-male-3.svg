@@ -1,0 +1,55 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="400" fill="#F5F7FA"/>
+  
+  <!-- Head -->
+  <circle cx="150" cy="100" r="50" fill="#F5DEB3"/>
+  
+  <!-- Hair (wavy, blonde) -->
+  <path d="M 100 75 Q 100 30 150 30 Q 200 30 200 75 Q 200 92 195 110 Q 150 122 105 110 Q 100 92 100 75" fill="#D4AF37"/>
+  
+  <!-- Ears -->
+  <ellipse cx="93" cy="105" rx="11" ry="24" fill="#F5DEB3"/>
+  <ellipse cx="207" cy="105" rx="11" ry="24" fill="#F5DEB3"/>
+  
+  <!-- Eyes (blue) -->
+  <circle cx="130" cy="95" r="7" fill="#4A90E2"/>
+  <circle cx="170" cy="95" r="7" fill="#4A90E2"/>
+  <circle cx="133" cy="92" r="3" fill="white"/>
+  <circle cx="173" cy="92" r="3" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M 119 76 Q 130 70 141 76" stroke="#B8860B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 159 76 Q 170 70 181 76" stroke="#B8860B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <line x1="150" y1="90" x2="150" y2="110" stroke="#E6C9A0" stroke-width="2"/>
+  
+  <!-- Mouth (warm smile) -->
+  <path d="M 134 124 Q 150 134 166 124" stroke="#E78C6B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Professional Suit (Burgundy) -->
+  <rect x="80" y="160" width="140" height="160" rx="20" fill="#6B2C39"/>
+  
+  <!-- White Shirt -->
+  <rect x="100" y="160" width="100" height="88" fill="white"/>
+  
+  <!-- Burgundy Tie -->
+  <rect x="143" y="168" width="14" height="60" fill="#8B3A45"/>
+  <polygon points="143,168 157,168 159,176 150,180 141,176" fill="#5B1F27"/>
+  
+  <!-- Name Badge/Pendant -->
+  <rect x="145" y="195" width="10" height="14" rx="2" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  
+  <!-- Arms (professional pose) -->
+  <rect x="48" y="188" width="32" height="102" rx="16" fill="#F5DEB3"/>
+  <rect x="220" y="188" width="32" height="102" rx="16" fill="#F5DEB3"/>
+  
+  <!-- Hands -->
+  <circle cx="64" cy="295" r="17" fill="#F5DEB3"/>
+  <circle cx="236" cy="295" r="17" fill="#F5DEB3"/>
+  
+  <!-- Subtle smile lines -->
+  <path d="M 128 115 Q 130 120 135 118" stroke="#E6C9A0" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M 165 118 Q 170 120 172 115" stroke="#E6C9A0" stroke-width="1" fill="none" opacity="0.5"/>
+</svg>

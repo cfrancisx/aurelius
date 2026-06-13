@@ -1,0 +1,57 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="400" fill="#F5F7FA"/>
+  
+  <!-- Head -->
+  <circle cx="150" cy="100" r="50" fill="#D4A574"/>
+  
+  <!-- Hair -->
+  <path d="M 100 90 Q 100 30 150 30 Q 200 30 200 90" fill="#3D2817"/>
+  
+  <!-- Ears -->
+  <ellipse cx="95" cy="100" rx="12" ry="25" fill="#D4A574"/>
+  <ellipse cx="205" cy="100" rx="12" ry="25" fill="#D4A574"/>
+  
+  <!-- Eyes -->
+  <circle cx="130" cy="90" r="6" fill="#2C1810"/>
+  <circle cx="170" cy="90" r="6" fill="#2C1810"/>
+  <circle cx="132" cy="88" r="2" fill="white"/>
+  <circle cx="172" cy="88" r="2" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M 120 75 Q 130 70 140 75" stroke="#3D2817" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 160 75 Q 170 70 180 75" stroke="#3D2817" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <line x1="150" y1="85" x2="150" y2="105" stroke="#C49464" stroke-width="2"/>
+  <circle cx="145" cy="107" r="3" fill="#C49464"/>
+  <circle cx="155" cy="107" r="3" fill="#C49464"/>
+  
+  <!-- Mouth -->
+  <path d="M 135 120 Q 150 130 165 120" stroke="#8B5A3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Business Suit -->
+  <rect x="80" y="160" width="140" height="160" rx="20" fill="#1A3A5C"/>
+  
+  <!-- White Shirt -->
+  <rect x="100" y="160" width="100" height="80" fill="white"/>
+  
+  <!-- Tie -->
+  <rect x="142" y="165" width="16" height="70" fill="#C41E3A"/>
+  <polygon points="142,165 158,165 160,175 150,180 140,175" fill="#8B0000"/>
+  
+  <!-- Jacket shoulders -->
+  <ellipse cx="100" cy="180" rx="25" ry="20" fill="#1A3A5C"/>
+  <ellipse cx="200" cy="180" rx="25" ry="20" fill="#1A3A5C"/>
+  
+  <!-- Arms -->
+  <rect x="50" y="180" width="30" height="100" rx="15" fill="#D4A574"/>
+  <rect x="220" y="180" width="30" height="100" rx="15" fill="#D4A574"/>
+  
+  <!-- Hands -->
+  <circle cx="65" cy="285" r="16" fill="#D4A574"/>
+  <circle cx="235" cy="285" r="16" fill="#D4A574"/>
+  
+  <!-- Smile enhancement -->
+  <path d="M 135 125 Q 150 135 165 125" stroke="#A0684D" stroke-width="1.5" fill="none"/>
+</svg>
