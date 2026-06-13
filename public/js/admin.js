@@ -135,52 +135,85 @@ async function handleCustomerSearch(e) {
 
 async function handleCreditAccount(e) {
     e.preventDefault();
-    const accountNumber = document.getElementById('creditAccount').value;
+    const accountNumber = document.getElementById('creditAccount').value.trim();
     const amount = parseFloat(document.getElementById('creditAmount').value);
-    const reason = document.getElementById('creditReason').value;
+    const reason = document.getElementById('creditReason').value.trim();
+    
+    // Validation
+    if (!accountNumber || !amount || !reason) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (amount <= 0) {
+        showToast('Amount must be greater than 0', 'error');
+        return;
+    }
     
     try {
-        await api.creditAccount(accountNumber, amount, reason);
-        showToast('Account credited successfully', 'success');
+        const response = await api.creditAccount(accountNumber, amount, reason);
+        showToast(`✅ ${response.message} - £${formatNumber(response.account.adjustment_amount)}`, 'success');
         closeModal('creditModal');
         document.getElementById('creditForm').reset();
         await loadBalanceData();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(`❌ ${error.message}`, 'error');
     }
 }
 
 async function handleDebitAccount(e) {
     e.preventDefault();
-    const accountNumber = document.getElementById('debitAccount').value;
+    const accountNumber = document.getElementById('debitAccount').value.trim();
     const amount = parseFloat(document.getElementById('debitAmount').value);
-    const reason = document.getElementById('debitReason').value;
+    const reason = document.getElementById('debitReason').value.trim();
+    
+    // Validation
+    if (!accountNumber || !amount || !reason) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (amount <= 0) {
+        showToast('Amount must be greater than 0', 'error');
+        return;
+    }
     
     try {
-        await api.debitAccount(accountNumber, amount, reason);
-        showToast('Account debited successfully', 'success');
+        const response = await api.debitAccount(accountNumber, amount, reason);
+        showToast(`✅ ${response.message} - £${formatNumber(response.account.adjustment_amount)}`, 'success');
         closeModal('debitModal');
         document.getElementById('debitForm').reset();
         await loadBalanceData();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(`❌ ${error.message}`, 'error');
     }
 }
 
 async function handleSetBalance(e) {
     e.preventDefault();
-    const accountNumber = document.getElementById('setBalanceAccount').value;
+    const accountNumber = document.getElementById('setBalanceAccount').value.trim();
     const newBalance = parseFloat(document.getElementById('newBalance').value);
-    const reason = document.getElementById('setBalanceReason').value;
+    const reason = document.getElementById('setBalanceReason').value.trim();
+    
+    // Validation
+    if (!accountNumber || newBalance === null || isNaN(newBalance) || !reason) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (newBalance < 0) {
+        showToast('Balance cannot be negative', 'error');
+        return;
+    }
     
     try {
-        await api.setExactBalance(accountNumber, newBalance, reason);
-        showToast('Balance set successfully', 'success');
+        const response = await api.setExactBalance(accountNumber, newBalance, reason);
+        showToast(`✅ ${response.message} - New Balance: £${formatNumber(response.account.new_balance)}`, 'success');
         closeModal('setBalanceModal');
         document.getElementById('setBalanceForm').reset();
         await loadBalanceData();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(`❌ ${error.message}`, 'error');
     }
 }
 
@@ -191,13 +224,6 @@ function viewCustomer(customerId) {
 function manageBalance(customerId) {
     document.getElementById('balanceModal').style.display = 'block';
     document.getElementById('customerId').value = customerId;
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-    }
 }
 
 async function loadBalanceData() {
@@ -235,15 +261,56 @@ function debounce(func, wait) {
 
 // Balance Management Modal Functions
 function showCreditModal() {
-    document.getElementById('creditModal').style.display = 'block';
+    const modal = document.getElementById('creditModal');
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal('creditModal');
+            }
+        };
+    }
 }
 
 function showDebitModal() {
-    document.getElementById('debitModal').style.display = 'block';
+    const modal = document.getElementById('debitModal');
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal('debitModal');
+            }
+        };
+    }
 }
 
 function showSetBalanceModal() {
-    document.getElementById('setBalanceModal').style.display = 'block';
+    const modal = document.getElementById('setBalanceModal');
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal('setBalanceModal');
+            }
+        };
+    }
+}
+
+// Close modal with animation
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
 }
 
 // CSV Export Function
