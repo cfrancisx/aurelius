@@ -147,6 +147,10 @@ router.get('/dashboard/settings', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/dashboard/settings.html'));
 });
 
+router.get('/dashboard/kyc', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/dashboard/kyc.html'));
+});
+
 // Admin pages
 router.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/admin/index.html'));

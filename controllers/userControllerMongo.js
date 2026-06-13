@@ -29,40 +29,52 @@ class UserController {
                 return res.status(400).json({ error: 'Insufficient balance' });
             }
 
-            // Perform transfer
-            senderAcc.available_balance -= amount;
-            senderAcc.ledger_balance -= amount;
-            receiverAcc.available_balance += amount;
-            receiverAcc.ledger_balance += amount;
-
-            await senderAcc.save();
-            await receiverAcc.save();
-
-            // Log transaction
+            // Create pending transaction (needs admin approval)
             const reference = `TXN-${Date.now()}`;
-            await Transaction.create({
+            const transaction = await Transaction.create({
                 sender_account,
                 receiver_account,
                 amount,
                 transaction_type: 'transfer',
                 reference,
                 narration,
-                status: 'completed'
+                status: 'pending' // Pending admin approval
             });
 
             res.json({
-                message: 'Transfer successful',
+                message: 'Transfer submitted for approval',
                 reference,
                 transaction: {
                     sender_account,
                     receiver_account,
                     amount,
-                    status: 'completed'
+                    status: 'pending',
+                    reference
                 }
             });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Transfer failed' });
+        }
+    }
+
+    async uploadKYCDocument(req, res) {
+        try {
+            const userId = req.user.id;
+            // Accept any file upload - just mark KYC as verified
+            const user = await User.findByIdAndUpdate(
+                userId,
+                { kyc_status: 'verified' },
+                { new: true }
+            );
+
+            res.json({
+                message: 'KYC document uploaded successfully',
+                kyc_status: user.kyc_status
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'KYC upload failed' });
         }
     }
 

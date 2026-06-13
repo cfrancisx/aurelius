@@ -29,6 +29,7 @@ module.exports = function() {
     router.post('/transfer', (req, res) => userController.transfer(req, res));
     router.get('/transactions', (req, res) => userController.getTransactions(req, res));
     router.get('/balance', (req, res) => userController.getBalance(req, res));
+    router.post('/kyc/upload', (req, res) => userController.uploadKYCDocument(req, res));
 
     return router;
 };

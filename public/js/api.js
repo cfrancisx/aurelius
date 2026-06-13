@@ -149,6 +149,31 @@ class API {
         return this.request('/admin/balance/stats');
     }
 
+    async uploadKYC() {
+        return this.request('/kyc/upload', {
+            method: 'POST',
+            body: JSON.stringify({ document: 'uploaded' })
+        });
+    }
+
+    async getPendingTransactions() {
+        return this.request('/admin/transactions/pending');
+    }
+
+    async approveTransaction(reference) {
+        return this.request('/admin/transactions/approve', {
+            method: 'POST',
+            body: JSON.stringify({ reference })
+        });
+    }
+
+    async declineTransaction(reference, reason) {
+        return this.request('/admin/transactions/decline', {
+            method: 'POST',
+            body: JSON.stringify({ reference, reason })
+        });
+    }
+
     async getAuditLogs() {
         return this.request('/admin/audit-logs');
     }

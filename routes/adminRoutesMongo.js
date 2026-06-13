@@ -40,6 +40,11 @@ module.exports = function() {
     router.get('/customers', (req, res) => adminController.getCustomers(req, res));
     router.get('/transactions', (req, res) => adminController.getTransactions(req, res));
     router.get('/dashboard/stats', (req, res) => adminController.getDashboardStats(req, res));
+    
+    // Transaction approval/decline
+    router.get('/transactions/pending', (req, res) => adminController.getPendingTransactions(req, res));
+    router.post('/transactions/approve', (req, res) => adminController.approveTransaction(req, res));
+    router.post('/transactions/decline', (req, res) => adminController.declineTransaction(req, res));
 
     return router;
 };

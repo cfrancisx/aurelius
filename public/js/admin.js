@@ -21,11 +21,64 @@ async function loadAdminData() {
         const balanceStats = await api.getBalanceStats();
         updateBalanceStats(balanceStats);
         
+        const pendingTransactions = await api.getPendingTransactions();
+        updatePendingTransactions(pendingTransactions);
+        
         const auditLogs = await api.getAuditLogs();
         updateAuditLogs(auditLogs);
     } catch (error) {
         console.error('Failed to load admin data:', error);
         showToast('Failed to load admin data', 'error');
+    }
+}
+
+function updatePendingTransactions(transactions) {
+    const container = document.getElementById('pendingTransactions');
+    if (!container) return;
+    
+    if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No pending transactions</p>';
+        return;
+    }
+    
+    container.innerHTML = transactions.map(txn => `
+        <div class="transaction-item" style="background: #FFF3CD; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; border-left: 4px solid #FFC107;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${txn.sender_account} → ${txn.receiver_account}</strong><br>
+                    <small>Amount: £${formatNumber(txn.amount)}</small><br>
+                    <small>Ref: ${txn.reference}</small><br>
+                    <small>Date: ${new Date(txn.created_at).toLocaleString()}</small>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="approveTxn('${txn.reference}')" class="btn" style="background: #28A745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer;">✓ Approve</button>
+                    <button onclick="declineTxn('${txn.reference}')" class="btn" style="background: #DC3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer;">✕ Decline</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function approveTxn(reference) {
+    try {
+        await api.approveTransaction(reference);
+        showToast('✅ Transaction approved and completed', 'success');
+        await loadAdminData();
+    } catch (error) {
+        showToast(`❌ ${error.message}`, 'error');
+    }
+}
+
+async function declineTxn(reference) {
+    const reason = prompt('Reason for declining transaction:');
+    if (!reason) return;
+    
+    try {
+        await api.declineTransaction(reference, reason);
+        showToast('✅ Transaction declined', 'success');
+        await loadAdminData();
+    } catch (error) {
+        showToast(`❌ ${error.message}`, 'error');
     }
 }
 

@@ -75,6 +75,89 @@ class AdminController {
             res.status(500).json({ error: 'Failed to fetch dashboard stats' });
         }
     }
+
+    async getPendingTransactions(req, res) {
+        try {
+            const pending = await Transaction.find({ status: 'pending' }).sort({ created_at: -1 });
+            res.json(pending);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to fetch pending transactions' });
+        }
+    }
+
+    async approveTransaction(req, res) {
+        try {
+            const { reference } = req.body;
+            const transaction = await Transaction.findOne({ reference });
+
+            if (!transaction) {
+                return res.status(404).json({ error: 'Transaction not found' });
+            }
+
+            if (transaction.status !== 'pending') {
+                return res.status(400).json({ error: 'Transaction is not pending' });
+            }
+
+            // Get accounts
+            const senderAcc = await Account.findOne({ account_number: transaction.sender_account });
+            const receiverAcc = await Account.findOne({ account_number: transaction.receiver_account });
+
+            if (!senderAcc || !receiverAcc) {
+                return res.status(404).json({ error: 'Account not found' });
+            }
+
+            // Perform transfer
+            senderAcc.available_balance -= transaction.amount;
+            senderAcc.ledger_balance -= transaction.amount;
+            receiverAcc.available_balance += transaction.amount;
+            receiverAcc.ledger_balance += transaction.amount;
+
+            await senderAcc.save();
+            await receiverAcc.save();
+
+            // Update transaction status
+            transaction.status = 'completed';
+            await transaction.save();
+
+            res.json({
+                message: 'Transaction approved and completed',
+                reference,
+                status: 'completed'
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Transaction approval failed' });
+        }
+    }
+
+    async declineTransaction(req, res) {
+        try {
+            const { reference, reason } = req.body;
+            const transaction = await Transaction.findOne({ reference });
+
+            if (!transaction) {
+                return res.status(404).json({ error: 'Transaction not found' });
+            }
+
+            if (transaction.status !== 'pending') {
+                return res.status(400).json({ error: 'Transaction is not pending' });
+            }
+
+            // Update transaction status
+            transaction.status = 'declined';
+            await transaction.save();
+
+            res.json({
+                message: 'Transaction declined',
+                reference,
+                status: 'declined'
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Transaction decline failed' });
+        }
+    }
 }
 
 module.exports = AdminController;

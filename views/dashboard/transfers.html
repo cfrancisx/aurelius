@@ -127,10 +127,11 @@
             
             try {
                 const result = await api.transfer(transferData);
-                alert('Transfer completed successfully!');
-                location.reload();
+                alert('✅ Transfer submitted successfully!\n\nYour transfer is now PENDING admin approval.\nThe admin will review and approve/decline within 24 hours.\n\nReference: ' + result.reference);
+                document.getElementById('transferForm').reset();
+                loadRecentTransfers();
             } catch (error) {
-                alert(error.message);
+                alert('❌ ' + error.message);
             }
         });
         

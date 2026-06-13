@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .kyc-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .kyc-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .kyc-header h2 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .kyc-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .kyc-status {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .kyc-status.verified {
+            background: #E8F5E9;
+            border: 2px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .kyc-status.pending {
+            background: #FFF3E0;
+            border: 2px solid #FF9800;
+            color: #E65100;
+        }
+
+        .kyc-status .status-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .kyc-status h3 {
+            margin: 0.5rem 0;
+        }
+
+        .kyc-upload-section {
+            border: 2px dashed var(--primary);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            background: #F5F7FA;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .kyc-upload-section:hover {
+            background: #EEF2F8;
+            border-color: #0052A3;
+        }
+
+        .kyc-upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .file-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-info .file-name {
+            font-weight: 600;
+            color: var(--primary);
+            word-break: break-all;
+        }
+
+        .file-info .file-size {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .kyc-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .kyc-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .kyc-form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #DDD;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .kyc-form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 61, 130, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: #0052A3;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.success {
+            background: #E8F5E9;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .alert.error {
+            background: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #C62828;
+        }
+
+        .info-section {
+            background: #F5F7FA;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-section h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .info-section ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .info-section li {
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .kyc-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">🏦 AURELIUS BANK</div>
+        <button onclick="logout()" class="btn btn-outline">Logout</button>
+    </div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="/dashboard">📊 Overview</a>
+                <a href="/dashboard/accounts">💳 Accounts</a>
+                <a href="/dashboard/cards">🎫 Cards</a>
+                <a href="/dashboard/transfers">↔️ Transfers</a>
+                <a href="/dashboard/payments">💸 Payments</a>
+                <a href="/dashboard/statements">📄 Statements</a>
+                <a href="/dashboard/loans">🏦 Loans</a>
+                <a href="/dashboard/kyc" class="active">✅ KYC Verification</a>
+                <a href="/dashboard/settings">⚙️ Settings</a>
+                <a href="/dashboard/support">🆘 Support</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="kyc-container">
+                <div class="kyc-header">
+                    <h2>✅ KYC Verification</h2>
+                    <p>Complete your Know Your Customer verification to unlock all features</p>
+                </div>
+
+                <div id="kycAlert" class="alert"></div>
+
+                <div id="kycStatus" class="kyc-status pending">
+                    <div class="status-icon">⏳</div>
+                    <h3 id="statusTitle">Verification Pending</h3>
+                    <p id="statusText">Upload a valid identification document to verify your account</p>
+                </div>
+
+                <form id="kycForm" style="display: block;">
+                    <div class="kyc-upload-section" onclick="document.getElementById('documentInput').click()">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text"><strong>Click to upload or drag and drop</strong></div>
+                        <div class="upload-hint">PNG, JPG, PDF (Max 5MB)</div>
+                        <input type="file" id="documentInput" accept="image/*,.pdf" onchange="handleFileSelect(event)">
+                        <div class="file-info" id="fileInfo">
+                            <div class="file-name" id="fileName"></div>
+                            <div class="file-size" id="fileSize"></div>
+                        </div>
+                    </div>
+
+                    <div class="kyc-form-group">
+                        <label for="docType">Document Type</label>
+                        <select id="docType" style="width: 100%; padding: 0.75rem; border: 1px solid #DDD; border-radius: 0.5rem;">
+                            <option value="">Select Document Type</option>
+                            <option value="passport">Passport</option>
+                            <option value="driver_license">Driver's License</option>
+                            <option value="id_card">National ID Card</option>
+                            <option value="other">Other Identification</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Submit for Verification</button>
+                </form>
+
+                <div class="info-section">
+                    <h4>❓ Why KYC Verification?</h4>
+                    <ul>
+                        <li>Protects you and Aurelius Bank from fraud</li>
+                        <li>Complies with financial regulations</li>
+                        <li>Increases your transaction limits</li>
+                        <li>Enables international transfers</li>
+                        <li>Enhances account security</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+            checkKYCStatus();
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                showAlert('File size must be less than 5MB', 'error');
+                document.getElementById('documentInput').value = '';
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+            document.getElementById('fileInfo').classList.add('show');
+        }
+
+        document.getElementById('kycForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = document.getElementById('documentInput').files[0];
+            const docType = document.getElementById('docType').value;
+
+            if (!file) {
+                showAlert('Please select a document', 'error');
+                return;
+            }
+
+            if (!docType) {
+                showAlert('Please select document type', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const result = await api.uploadKYC();
+                showAlert('✅ KYC document submitted successfully! Your account is now verified.', 'success');
+                
+                setTimeout(() => {
+                    checkKYCStatus();
+                    document.getElementById('kycForm').style.display = 'none';
+                }, 1000);
+            } catch (error) {
+                showAlert('❌ ' + error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit for Verification';
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('kycAlert');
+            alert.className = `alert show ${type}`;
+            alert.textContent = message;
+        }
+
+        function checkKYCStatus() {
+            // Check if user is already verified
+            const status = localStorage.getItem('kycStatus');
+            if (status === 'verified') {
+                document.getElementById('kycStatus').className = 'kyc-status verified';
+                document.getElementById('statusTitle').textContent = '✅ Verified';
+                document.getElementById('statusText').textContent = 'Your account is KYC verified';
+                document.getElementById('kycForm').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
