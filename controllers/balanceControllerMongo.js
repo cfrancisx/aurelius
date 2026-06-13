@@ -144,6 +144,71 @@ class BalanceController {
             res.status(500).json({ error: 'Set balance operation failed' });
         }
     }
+
+    async getBalanceStats(req, res) {
+        try {
+            // Get aggregation stats
+            const adjustments = await BalanceAdjustment.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        total: { $sum: 1 },
+                        credits: {
+                            $sum: { $cond: [{ $eq: ['$adjustment_type', 'credit'] }, 1, 0] }
+                        },
+                        debits: {
+                            $sum: { $cond: [{ $eq: ['$adjustment_type', 'debit'] }, 1, 0] }
+                        },
+                        credit_amount: {
+                            $sum: {
+                                $cond: [{ $eq: ['$adjustment_type', 'credit'] }, '$adjustment_amount', 0]
+                            }
+                        },
+                        debit_amount: {
+                            $sum: {
+                                $cond: [{ $eq: ['$adjustment_type', 'debit'] }, '$adjustment_amount', 0]
+                            }
+                        }
+                    }
+                }
+            ]);
+
+            // Get recent adjustments with user info
+            const recent = await BalanceAdjustment.aggregate([
+                { $sort: { created_at: -1 } },
+                { $limit: 10 },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'user_id',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                { $unwind: '$user' },
+                {
+                    $project: {
+                        first_name: '$user.first_name',
+                        last_name: '$user.last_name',
+                        account_number: 1,
+                        adjustment_type: 1,
+                        adjustment_amount: 1,
+                        created_at: 1,
+                        reason: 1,
+                        admin_name: 'System Admin'
+                    }
+                }
+            ]);
+
+            res.json({
+                stats: adjustments[0] || { total: 0, credits: 0, debits: 0, credit_amount: 0, debit_amount: 0 },
+                recent
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to get balance stats' });
+        }
+    }
 }
 
 module.exports = BalanceController;

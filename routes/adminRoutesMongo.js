@@ -33,7 +33,7 @@ module.exports = function() {
     // Balance management
     router.post('/balance/credit', (req, res) => balanceController.creditAccount(req, res));
     router.post('/balance/debit', (req, res) => balanceController.debitAccount(req, res));
-    router.post('/balance/set', (req, res) => balanceController.setExactBalance(req, res));
+    router.post('/balance/set-exact', (req, res) => balanceController.setExactBalance(req, res));
     router.get('/balance/stats', (req, res) => balanceController.getBalanceStats(req, res));
 
     // Admin operations
