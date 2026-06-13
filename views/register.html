@@ -369,12 +369,17 @@
                     loading.classList.remove('show');
                     btnText.textContent = 'Create Account';
                 } else if (result.token || result.user) {
-                    successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                    successDiv.textContent = 'Account created successfully! Proceeding to ID verification...';
                     successDiv.classList.add('show');
                     loading.classList.remove('show');
                     
+                    // Store token temporarily for ID verification
+                    if (result.token) {
+                        localStorage.setItem('token', result.token);
+                    }
+                    
                     setTimeout(() => {
-                        window.location.href = '/login';
+                        window.location.href = '/register/id-verification';
                     }, 1500);
                 }
             } catch (error) {

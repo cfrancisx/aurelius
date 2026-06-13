@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Verification - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #003D82 0%, #002B5C 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .verification-wrapper {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .verification-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 2.5rem 2rem;
+        }
+
+        .verification-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .verification-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .verification-header h1 {
+            font-size: 1.75rem;
+            color: #003D82;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        .verification-subtitle {
+            color: #666666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .verification-steps {
+            background: #F5F7FA;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .verification-steps p {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .verification-steps p:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00AA62;
+            font-weight: bold;
+        }
+
+        .upload-section {
+            border: 2px dashed #003D82;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            background: #F5F7FA;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-section:hover {
+            background: #EEF2F8;
+            border-color: #0052A3;
+            transform: translateY(-2px);
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .camera-btn {
+            background: #003D82;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 0.5rem;
+        }
+
+        .camera-btn:hover {
+            background: #0052A3;
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #E8F5E9;
+            border: 1px solid #4CAF50;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .file-preview.show {
+            display: block;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            color: #2E7D32;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .btn-verify {
+            width: 100%;
+            padding: 0.75rem;
+            background: #003D82;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-verify:hover {
+            background: #0052A3;
+        }
+
+        .btn-verify:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-skip {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            color: #003D82;
+            border: 1px solid #003D82;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.75rem;
+        }
+
+        .btn-skip:hover {
+            background: #F5F7FA;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.success {
+            background: #E8F5E9;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .alert.error {
+            background: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #C62828;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E0E3E8;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: #003D82;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 61, 130, 0.3);
+            border-top: 2px solid #003D82;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .loading-spinner.show {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .verification-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .verification-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .upload-section {
+                padding: 1.5rem;
+            }
+
+            .camera-btn {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+        }
+
+        .info-box {
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #E65100;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-wrapper">
+        <div class="verification-card">
+            <div class="verification-header">
+                <div class="verification-icon">🆔</div>
+                <h1>ID Verification</h1>
+                <p class="verification-subtitle">Complete your account setup</p>
+            </div>
+
+            <div id="successAlert" class="alert success"></div>
+            <div id="errorAlert" class="alert error"></div>
+
+            <div class="info-box">
+                <strong>📸 Quick Setup</strong>
+                Upload or take a photo of a valid ID to complete verification
+            </div>
+
+            <div class="verification-steps">
+                <p>Upload a clear photo of:</p>
+                <p>Passport, Driver's License, or National ID Card</p>
+            </div>
+
+            <form id="verificationForm">
+                <div class="upload-section" onclick="document.getElementById('idInput').click(); return false;">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Click to upload your ID photo</div>
+                    <div class="upload-hint">PNG, JPG, or PDF (Max 5MB)</div>
+                    <input type="file" id="idInput" accept="image/*,.pdf" onchange="handleFileSelect(event)">
+                    <div style="margin-top: 1rem;">
+                        <button type="button" class="camera-btn" onclick="capturePhoto()">
+                            📸 Take Photo
+                        </button>
+                        <button type="button" class="camera-btn" onclick="document.getElementById('idInput').click()">
+                            📁 Upload File
+                        </button>
+                    </div>
+                </div>
+
+                <div class="file-preview" id="filePreview">
+                    <img id="previewImage" style="display: none;">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+
+                <button type="submit" class="btn-verify" id="submitBtn" disabled>
+                    <span class="loading-spinner" id="spinner"></span>
+                    <span id="btnText">Verify & Continue</span>
+                </button>
+
+                <button type="button" class="btn-skip" onclick="skipVerification()">
+                    Skip for Now → Go to Login
+                </button>
+            </form>
+
+            <div class="progress-indicator">
+                <span class="step-badge">Step 3 of 3</span>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem;">Account Setup</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for camera capture -->
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        let selectedFile = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                showAlert('File size must be less than 5MB', 'error');
+                document.getElementById('idInput').value = '';
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('filePreview');
+                const previewImage = document.getElementById('previewImage');
+                
+                if (file.type.startsWith('image/')) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.style.display = 'none';
+                }
+                
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+                preview.classList.add('show');
+            };
+            reader.readAsDataURL(file);
+
+            // Enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function capturePhoto() {
+            // Check if browser supports getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showAlert('Camera not supported on this device. Please upload a file instead.', 'error');
+                return;
+            }
+
+            // Request camera access
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    const video = document.createElement('video');
+                    const canvas = document.getElementById('canvas');
+                    video.srcObject = stream;
+                    video.play();
+
+                    // Create a simple capture UI
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: black;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 10000;
+                    `;
+
+                    video.style.cssText = `
+                        max-width: 90vw;
+                        max-height: 70vh;
+                        border-radius: 0.5rem;
+                    `;
+
+                    const captureBtn = document.createElement('button');
+                    captureBtn.textContent = '📸 Capture Photo';
+                    captureBtn.style.cssText = `
+                        margin-top: 2rem;
+                        padding: 0.75rem 2rem;
+                        background: #003D82;
+                        color: white;
+                        border: none;
+                        border-radius: 0.5rem;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background 0.2s;
+                    `;
+
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = '✕ Close';
+                    closeBtn.style.cssText = `
+                        margin-left: 0.5rem;
+                        padding: 0.75rem 2rem;
+                        background: #666;
+                        color: white;
+                        border: none;
+                        border-radius: 0.5rem;
+                        font-size: 1rem;
+                        cursor: pointer;
+                    `;
+
+                    const controls = document.createElement('div');
+                    controls.style.cssText = 'display: flex; gap: 1rem; margin-top: 2rem;';
+                    controls.appendChild(captureBtn);
+                    controls.appendChild(closeBtn);
+
+                    modal.appendChild(video);
+                    modal.appendChild(controls);
+                    document.body.appendChild(modal);
+
+                    captureBtn.onclick = () => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+                        
+                        canvas.toBlob(blob => {
+                            selectedFile = new File([blob], 'id_photo.jpg', { type: 'image/jpeg' });
+                            
+                            // Update preview
+                            const preview = document.getElementById('filePreview');
+                            const previewImage = document.getElementById('previewImage');
+                            previewImage.src = canvas.toDataURL();
+                            previewImage.style.display = 'block';
+                            document.getElementById('fileName').textContent = selectedFile.name;
+                            document.getElementById('fileSize').textContent = (selectedFile.size / 1024).toFixed(2) + ' KB';
+                            preview.classList.add('show');
+
+                            // Enable submit button
+                            document.getElementById('submitBtn').disabled = false;
+
+                            stream.getTracks().forEach(track => track.stop());
+                            modal.remove();
+                            showAlert('✅ Photo captured! Click Verify to complete.', 'success');
+                        });
+                    };
+
+                    closeBtn.onclick = () => {
+                        stream.getTracks().forEach(track => track.stop());
+                        modal.remove();
+                    };
+                })
+                .catch(err => {
+                    showAlert('❌ Camera access denied. Please upload a file instead.', 'error');
+                });
+        }
+
+        document.getElementById('verificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedFile) {
+                showAlert('Please upload or capture an ID photo', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+
+            submitBtn.disabled = true;
+            spinner.classList.add('show');
+            btnText.textContent = 'Verifying...';
+
+            try {
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append('document', selectedFile);
+
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/kyc/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('✅ ID verified successfully! Redirecting to login...', 'success');
+                    
+                    setTimeout(() => {
+                        // Clear the registration token since user hasn't fully logged in yet
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = '/login';
+                    }, 1500);
+                } else {
+                    showAlert('❌ ' + (data.error || 'Verification failed'), 'error');
+                    submitBtn.disabled = false;
+                    spinner.classList.remove('show');
+                    btnText.textContent = 'Verify & Continue';
+                }
+            } catch (error) {
+                showAlert('❌ Error during verification. Please try again.', 'error');
+                submitBtn.disabled = false;
+                spinner.classList.remove('show');
+                btnText.textContent = 'Verify & Continue';
+            }
+        });
+
+        function skipVerification() {
+            if (confirm('You can verify your ID later from your dashboard. Continue to login?')) {
+                // Clear tokens since user is just registering
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById(`${type}Alert`);
+            alertDiv.textContent = message;
+            alertDiv.classList.add('show');
+            
+            if (type === 'success') {
+                document.getElementById('errorAlert').classList.remove('show');
+            } else {
+                document.getElementById('successAlert').classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

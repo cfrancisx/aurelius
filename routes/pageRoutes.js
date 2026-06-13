@@ -94,6 +94,10 @@ router.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/register.html'));
 });
 
+router.get('/register/id-verification', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/register-id-verification.html'));
+});
+
 router.get('/forgot-password', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/forgot-password.html'));
 });
