@@ -18,6 +18,8 @@ services:
         value: aureliusadmin@gmail.com
       - key: ADMIN_PASSWORD
         value: Admin12345
+      - key: MONGODB_URI
+        value: mongodb+srv://aurelius_admin:Admin12345@cluster0.3mottii.mongodb.net/?appName=Cluster0
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

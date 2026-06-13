@@ -5,8 +5,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const dotenv = require('dotenv');
-const { initDatabase } = require('./database/init');
-const { seedDatabase } = require('./database/seed');
+const { connectDatabase } = require('./database/mongodb');
+const { seedMongoDB } = require('./database/mongoSeed');
 
 dotenv.config();
 
@@ -56,21 +56,19 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database initialization and route setup
-let db;
 (async () => {
-    db = await initDatabase();
-    await seedDatabase();
-    app.locals.db = db;
+    await connectDatabase();
+    await seedMongoDB();
     
     // Routes (register after DB is initialized)
-    const authRoutes = require('./routes/authRoutes');
-    const apiRoutes = require('./routes/apiRoutes');
-    const adminRoutes = require('./routes/adminRoutes');
+    const authRoutes = require('./routes/authRoutesMongo');
+    const apiRoutes = require('./routes/apiRoutesMongo');
+    const adminRoutes = require('./routes/adminRoutesMongo');
     const pageRoutes = require('./routes/pageRoutes');
     
-    app.use('/auth', authRoutes(db));
-    app.use('/api', apiRoutes(db));
-    app.use('/api/admin', adminRoutes(db));
+    app.use('/auth', authRoutes());
+    app.use('/api', apiRoutes());
+    app.use('/api/admin', adminRoutes());
     app.use('/', pageRoutes);
     
     // Error handling middleware
