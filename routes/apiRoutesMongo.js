@@ -26,10 +26,20 @@ module.exports = function() {
     router.use(verifyToken);
 
     router.get('/accounts', (req, res) => userController.getAccounts(req, res));
+    router.get('/user-profile', (req, res) => userController.getUserProfile(req, res));
     router.post('/transfer', (req, res) => userController.transfer(req, res));
     router.get('/transactions', (req, res) => userController.getTransactions(req, res));
     router.get('/balance', (req, res) => userController.getBalance(req, res));
-    router.post('/kyc/upload', (req, res) => userController.uploadKYCDocument(req, res));
+    
+    // KYC upload with file handling
+    router.post('/kyc/upload', (req, res, next) => {
+        req.uploadMultiple(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            userController.uploadKYCDocument(req, res);
+        });
+    });
 
     return router;
 };

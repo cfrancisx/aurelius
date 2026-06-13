@@ -237,6 +237,101 @@
             color: #FF6B35;
         }
 
+        .kyc-status-card {
+            background: white;
+            border-left: 5px solid #FF9800;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kyc-status-card.verified {
+            border-left-color: #00AA62;
+            background: #F1F8F5;
+        }
+
+        .kyc-status-card.pending {
+            border-left-color: #FF9800;
+            background: #FFF8F0;
+        }
+
+        .kyc-status-card.rejected {
+            border-left-color: #F44336;
+            background: #FFEBEE;
+        }
+
+        .kyc-status-content {
+            flex: 1;
+        }
+
+        .kyc-status-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .kyc-status-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .kyc-status-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .kyc-status-action {
+            margin-top: 0.5rem;
+        }
+
+        .kyc-status-action a,
+        .kyc-status-action button {
+            text-decoration: none;
+            color: #003D82;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.95rem;
+        }
+
+        .kyc-status-action a:hover,
+        .kyc-status-action button:hover {
+            text-decoration: underline;
+        }
+
+        .kyc-status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kyc-status-badge.verified {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .kyc-status-badge.pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .kyc-status-badge.rejected {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
         @media (max-width: 768px) {
             .quick-stats {
                 grid-template-columns: 1fr;
@@ -244,6 +339,16 @@
 
             .quick-actions {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .kyc-status-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .kyc-status-icon {
+                margin-right: 0;
+                margin-bottom: 1rem;
             }
         }
     </style>
@@ -275,6 +380,9 @@
                 <h3>Your Financial Overview</h3>
                 <p>Total Net Worth: <strong id="totalNetWorth">£0</strong></p>
             </div>
+
+            <!-- KYC Status Section -->
+            <div id="kycStatusContainer"></div>
 
             <div class="quick-stats">
                 <div class="quick-stat">
@@ -332,6 +440,73 @@
 
     <script src="/js/api.js"></script>
     <script>
+        // Load KYC Status
+        async function loadKYCStatus() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/user-profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load profile');
+
+                const user = await response.json();
+                const kycStatus = user.kyc_status || 'pending';
+
+                let kycHTML = '';
+                
+                if (kycStatus === 'verified') {
+                    kycHTML = `
+                        <div class="kyc-status-card verified">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="kyc-status-icon">✅</div>
+                                <div class="kyc-status-content">
+                                    <div class="kyc-status-title">KYC Verification Complete</div>
+                                    <div class="kyc-status-description">Your identity has been verified. You can now access all features.</div>
+                                </div>
+                            </div>
+                            <span class="kyc-status-badge verified">VERIFIED</span>
+                        </div>
+                    `;
+                } else if (kycStatus === 'rejected') {
+                    kycHTML = `
+                        <div class="kyc-status-card rejected">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="kyc-status-icon">❌</div>
+                                <div class="kyc-status-content">
+                                    <div class="kyc-status-title">KYC Verification Rejected</div>
+                                    <div class="kyc-status-description">Your verification was rejected. Please contact support.</div>
+                                    <div class="kyc-status-action"><a href="/dashboard/support">Contact Support →</a></div>
+                                </div>
+                            </div>
+                            <span class="kyc-status-badge rejected">REJECTED</span>
+                        </div>
+                    `;
+                } else {
+                    kycHTML = `
+                        <div class="kyc-status-card pending">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="kyc-status-icon">⏳</div>
+                                <div class="kyc-status-content">
+                                    <div class="kyc-status-title">KYC Verification Pending</div>
+                                    <div class="kyc-status-description">Please complete your identity verification to unlock all features including transfers.</div>
+                                    <div class="kyc-status-action"><a href="/dashboard/kyc">Complete Verification →</a></div>
+                                </div>
+                            </div>
+                            <span class="kyc-status-badge pending">PENDING</span>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('kycStatusContainer').innerHTML = kycHTML;
+            } catch (error) {
+                console.error('Error loading KYC status:', error);
+                // Don't show error to user, just skip KYC section
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async () => {
             // Setup logout
@@ -341,6 +516,9 @@
             });
 
             try {
+                // Load KYC status
+                await loadKYCStatus();
+
                 const accounts = await api.getAccounts();
                 const userName = localStorage.getItem('userName') || 'Customer';
                 document.getElementById('userName').textContent = userName;

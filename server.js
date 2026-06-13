@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
+const multer = require('multer');
 const dotenv = require('dotenv');
 const { connectDatabase } = require('./database/mongodb');
 const { seedMongoDB } = require('./database/mongoSeed');
@@ -13,6 +14,22 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Multer configuration for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+        // Accept images and PDFs
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and PDF allowed.'));
+        }
+    }
+});
 
 // Security middleware
 app.use(helmet({
@@ -40,6 +57,15 @@ app.use('/api/', limiter);
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Make upload middleware available globally
+app.use((req, res, next) => {
+    req.uploadMultiple = upload.fields([
+        { name: 'id_document', maxCount: 1 },
+        { name: 'selfie_photo', maxCount: 1 }
+    ]);
+    next();
+});
 
 // Verify MongoDB URI is available
 const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://aurelius_admin:Admin12345@cluster0.3mottii.mongodb.net/?appName=Cluster0';

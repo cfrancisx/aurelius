@@ -6,191 +6,407 @@
     <title>Transfer Money - Aurelius Bank</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .alert-banner {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-banner.show {
+            display: block;
+        }
+
+        .alert-banner.success {
+            background: #E8F5E9;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .alert-banner.error {
+            background: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #C62828;
+        }
+
+        .alert-banner.warning {
+            background: #FFF3E0;
+            border: 1px solid #FF9800;
+            color: #E65100;
+        }
+
+        .alert-banner.warning a {
+            color: #E65100;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .form-control:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            border-top-color: #003D82;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .badge.completed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .badge.declined {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard">
         <aside class="sidebar">
-            <div class="logo">AURELIUS BANK</div>
+            <div class="logo">🏦 AURELIUS</div>
             <ul class="sidebar-menu">
-                <li><a href="/dashboard/overview">📊 Overview</a></li>
+                <li><a href="/dashboard">📊 Overview</a></li>
                 <li><a href="/dashboard/accounts">💳 Accounts</a></li>
                 <li><a href="/dashboard/transfers" class="active">💸 Transfers</a></li>
                 <li><a href="/dashboard/payments">📱 Payments</a></li>
                 <li><a href="/dashboard/cards">💳 Cards</a></li>
                 <li><a href="/dashboard/loans">🏦 Loans</a></li>
                 <li><a href="/dashboard/statements">📄 Statements</a></li>
-                <li><a href="/dashboard/support">💬 Support</a></li>
+                <li><a href="/dashboard/kyc">✅ KYC Verification</a></li>
                 <li><a href="/dashboard/settings">⚙️ Settings</a></li>
             </ul>
         </aside>
         
         <main class="main-content">
             <header class="dashboard-header">
-                <h1>Transfer Money</h1>
+                <h1>💸 Transfer Money</h1>
             </header>
             
-            <div class="grid grid-2">
-                <div class="card">
-                    <h3>New Transfer</h3>
-                    <form id="transferForm" class="transfer-form">
-                        <div class="form-group">
-                            <label>From Account</label>
-                            <select id="fromAccount" class="form-control" required></select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>To Account Number</label>
-                            <input type="text" id="receiverAccount" class="form-control" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" id="amount" class="form-control" step="0.01" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Reference/Narration</label>
-                            <input type="text" id="narration" class="form-control" placeholder="Optional">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary btn-block">Send Money</button>
-                    </form>
-                </div>
+            <div id="alertContainer"></div>
+
+            <div class="card">
+                <h3>📤 New Transfer</h3>
                 
-                <div class="card">
-                    <h3>Beneficiaries</h3>
-                    <div id="beneficiariesList"></div>
-                    <button onclick="showAddBeneficiary()" class="btn btn-outline btn-block">Add Beneficiary</button>
+                <div id="kycWarning" class="alert-banner warning">
+                    ⚠️ <strong>KYC Verification Required</strong><br>
+                    Please complete your KYC verification to enable transfers. <a href="/dashboard/kyc">Verify now →</a>
                 </div>
+
+                <form id="transferForm" class="transfer-form">
+                    <div class="form-group">
+                        <label for="fromAccount">From Account <span class="loading" id="accountsLoading" style="display: none;"></span></label>
+                        <select id="fromAccount" class="form-control" required disabled>
+                            <option value="">Loading your accounts...</option>
+                        </select>
+                        <small id="fromAccountError" style="color: #C62828; display: none;">Failed to load accounts. Please refresh the page.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="receiverAccount">To Account Number</label>
+                        <input type="text" id="receiverAccount" class="form-control" placeholder="e.g., AUB123456789" required>
+                        <small style="color: #666;">Enter the recipient's account number</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount (£)</label>
+                        <input type="number" id="amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+                        <small style="color: #666;">Minimum £0.01</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="narration">Description (Optional)</label>
+                        <input type="text" id="narration" class="form-control" placeholder="e.g., Payment for invoice #123">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                        <span id="btnText">Send Transfer</span>
+                    </button>
+                </form>
             </div>
             
             <div class="card">
-                <h3>Recent Transfers</h3>
+                <h3>📊 Transfer History</h3>
                 <div class="transaction-table">
                     <table>
                         <thead>
-                            <tr><th>Date</th><th>To Account</th><th>Amount</th><th>Reference</th><th>Status</th></tr>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Account</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
                         </thead>
-                        <tbody id="recentTransfers"></tbody>
+                        <tbody id="recentTransfers">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">Loading transfers...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
     
-    <!-- Add Beneficiary Modal -->
-    <div id="beneficiaryModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3>Add Beneficiary</h3>
-            <form id="beneficiaryForm">
-                <div class="form-group">
-                    <label>Beneficiary Name</label>
-                    <input type="text" id="beneficiaryName" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Bank Name</label>
-                    <input type="text" id="bankName" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="beneficiaryAccount" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Save Beneficiary</button>
-            </form>
-        </div>
-    </div>
-    
     <script src="/js/api.js"></script>
     <script>
         let accounts = [];
+        let userKycStatus = 'pending';
         
+        // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            accounts = await api.getAccounts();
-            const fromAccountSelect = document.getElementById('fromAccount');
-            fromAccountSelect.innerHTML = accounts.map(acc => 
-                `<option value="${acc.account_number}">${acc.account_number} ($${acc.available_balance.toLocaleString()})</option>`
-            ).join('');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
             
-            loadBeneficiaries();
-            loadRecentTransfers();
+            await loadAccounts();
+            await loadTransferHistory();
         });
-        
+
+        async function loadAccounts() {
+            try {
+                const fromAccountSelect = document.getElementById('fromAccount');
+                const accountsLoading = document.getElementById('accountsLoading');
+                const fromAccountError = document.getElementById('fromAccountError');
+                
+                accountsLoading.style.display = 'inline-block';
+                fromAccountError.style.display = 'none';
+                
+                const response = await fetch('/api/accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                accounts = await response.json();
+                
+                if (!Array.isArray(accounts) || accounts.length === 0) {
+                    throw new Error('No accounts found');
+                }
+
+                // Populate dropdown with GBP currency
+                fromAccountSelect.innerHTML = accounts.map(acc => 
+                    `<option value="${acc.account_number}">
+                        ${acc.account_number} - £${acc.available_balance.toLocaleString('en-GB', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })}
+                    </option>`
+                ).join('');
+
+                fromAccountSelect.disabled = false;
+                accountsLoading.style.display = 'none';
+
+                // Check KYC status
+                checkKYCStatus();
+
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+                const fromAccountSelect = document.getElementById('fromAccount');
+                const fromAccountError = document.getElementById('fromAccountError');
+                fromAccountSelect.innerHTML = '<option value="">Error loading accounts</option>';
+                fromAccountSelect.disabled = true;
+                fromAccountError.style.display = 'block';
+                accountsLoading.style.display = 'none';
+                showAlert('Error loading your accounts. Please refresh the page.', 'error');
+            }
+        }
+
+        async function checkKYCStatus() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                userKycStatus = user.kyc_status || 'pending';
+                
+                const kycWarning = document.getElementById('kycWarning');
+                const form = document.getElementById('transferForm');
+                
+                if (userKycStatus !== 'verified') {
+                    kycWarning.style.display = 'block';
+                    form.style.opacity = '0.6';
+                    form.style.pointerEvents = 'none';
+                } else {
+                    kycWarning.style.display = 'none';
+                    form.style.opacity = '1';
+                    form.style.pointerEvents = 'auto';
+                }
+            } catch (error) {
+                console.error('Error checking KYC status:', error);
+            }
+        }
+
         document.getElementById('transferForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const transferData = {
-                receiver_account: document.getElementById('receiverAccount').value,
-                amount: parseFloat(document.getElementById('amount').value),
-                narration: document.getElementById('narration').value
-            };
-            
+            if (userKycStatus !== 'verified') {
+                showAlert('Please complete KYC verification before making transfers.', 'warning');
+                return;
+            }
+
+            const fromAccount = document.getElementById('fromAccount').value;
+            const receiverAccount = document.getElementById('receiverAccount').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const narration = document.getElementById('narration').value.trim();
+
+            // Validation
+            if (!fromAccount) {
+                showAlert('Please select a sending account.', 'error');
+                return;
+            }
+
+            if (!receiverAccount) {
+                showAlert('Please enter the recipient account number.', 'error');
+                return;
+            }
+
+            if (fromAccount === receiverAccount) {
+                showAlert('You cannot transfer to the same account.', 'error');
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0) {
+                showAlert('Please enter a valid amount.', 'error');
+                return;
+            }
+
+            // Check balance
+            const senderAccount = accounts.find(a => a.account_number === fromAccount);
+            if (senderAccount && senderAccount.available_balance < amount) {
+                showAlert(`Insufficient balance. Available: £${senderAccount.available_balance.toFixed(2)}`, 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            submitBtn.disabled = true;
+            btnText.textContent = '⏳ Processing...';
+
             try {
-                const result = await api.transfer(transferData);
-                alert('✅ Transfer submitted successfully!\n\nYour transfer is now PENDING admin approval.\nThe admin will review and approve/decline within 24 hours.\n\nReference: ' + result.reference);
+                const response = await fetch('/api/transfer', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender_account: fromAccount,
+                        receiver_account: receiverAccount,
+                        amount,
+                        narration
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Transfer failed');
+                }
+
+                showAlert(
+                    `✅ Transfer submitted successfully!\n\n` +
+                    `Reference: ${data.reference}\n` +
+                    `Status: PENDING (awaiting admin approval)\n` +
+                    `Amount: £${amount.toFixed(2)}\n\n` +
+                    `The admin will review and approve/decline within 24 hours.`,
+                    'success'
+                );
+
                 document.getElementById('transferForm').reset();
-                loadRecentTransfers();
+                document.getElementById('fromAccount').value = '';
+                await loadTransferHistory();
+
             } catch (error) {
-                alert('❌ ' + error.message);
+                console.error('Transfer error:', error);
+                showAlert(`❌ ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = 'Send Transfer';
             }
         });
-        
-        async function loadBeneficiaries() {
-            const beneficiaries = await api.getBeneficiaries();
-            const container = document.getElementById('beneficiariesList');
-            
-            container.innerHTML = beneficiaries.map(b => `
-                <div class="beneficiary-item" onclick="selectBeneficiary('${b.account_number}')">
-                    <div><strong>${b.beneficiary_name}</strong></div>
-                    <div>${b.bank_name}</div>
-                    <div>${b.account_number}</div>
-                </div>
-            `).join('');
-        }
-        
-        async function loadRecentTransfers() {
-            const account = accounts[0];
-            if (account) {
-                const transactions = await api.getTransactions(account.account_number);
-                const transfers = transactions.filter(t => t.transaction_type === 'transfer').slice(0, 10);
+
+        async function loadTransferHistory() {
+            try {
+                if (accounts.length === 0) return;
+
+                const response = await fetch('/api/transactions', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load transactions');
+
+                const transactions = await response.json();
+                const transfersOnly = transactions
+                    .filter(t => t.transaction_type === 'transfer')
+                    .slice(0, 10);
+
                 const container = document.getElementById('recentTransfers');
-                
-                container.innerHTML = transfers.map(t => `
+
+                if (transfersOnly.length === 0) {
+                    container.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No transfers yet</td></tr>';
+                    return;
+                }
+
+                container.innerHTML = transfersOnly.map(t => `
                     <tr>
-                        <td>${new Date(t.created_at).toLocaleDateString()}</td>
-                        <td>${t.receiver_account}</td>
-                        <td>$${t.amount.toLocaleString()}</td>
-                        <td>${t.narration || '-'}</td>
-                        <td><span class="badge badge-${t.status}">${t.status}</span></td>
+                        <td>${new Date(t.created_at).toLocaleDateString('en-GB')}</td>
+                        <td>${t.transaction_type}</td>
+                        <td>${t.receiver_account || t.sender_account}</td>
+                        <td>£${t.amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td><span class="badge ${t.status}">${t.status.toUpperCase()}</span></td>
                     </tr>
                 `).join('');
+
+            } catch (error) {
+                console.error('Error loading transfer history:', error);
+                document.getElementById('recentTransfers').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center; color: #C62828;">Error loading transfer history</td></tr>';
             }
         }
-        
-        function selectBeneficiary(accountNumber) {
-            document.getElementById('receiverAccount').value = accountNumber;
-        }
-        
-        function showAddBeneficiary() {
-            document.getElementById('beneficiaryModal').style.display = 'block';
-        }
-        
-        document.getElementById('beneficiaryForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                beneficiary_name: document.getElementById('beneficiaryName').value,
-                bank_name: document.getElementById('bankName').value,
-                account_number: document.getElementById('beneficiaryAccount').value
-            };
-            
-            await api.addBeneficiary(data);
-            closeModal();
-            loadBeneficiaries();
-        });
-        
-        function closeModal() {
-            document.getElementById('beneficiaryModal').style.display = 'none';
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert-banner show ${type}`;
+            alert.textContent = message;
+            alert.style.whiteSpace = 'pre-wrap';
+            container.innerHTML = '';
+            container.appendChild(alert);
+
+            if (type === 'success') {
+                setTimeout(() => alert.remove(), 5000);
+            }
         }
     </script>
 </body>

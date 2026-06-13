@@ -61,16 +61,57 @@ class UserController {
     async uploadKYCDocument(req, res) {
         try {
             const userId = req.user.id;
-            // Accept any file upload - just mark KYC as verified
+            
+            // Check if files are provided
+            const id_document = req.files?.id_document?.[0];
+            const selfie_photo = req.files?.selfie_photo?.[0];
+
+            if (!id_document && !selfie_photo) {
+                // Accept request without files (for backward compatibility)
+                // Just mark KYC as verified
+                const user = await User.findByIdAndUpdate(
+                    userId,
+                    { kyc_status: 'verified' },
+                    { new: true }
+                );
+
+                return res.json({
+                    message: 'KYC verification completed',
+                    kyc_status: user.kyc_status
+                });
+            }
+
+            // If files are provided, validate both are present
+            if ((id_document && !selfie_photo) || (!id_document && selfie_photo)) {
+                return res.status(400).json({ 
+                    error: 'Both ID document and selfie photo are required' 
+                });
+            }
+
+            // Update user with KYC status and file information
+            const kyc_documents = {
+                id_document_name: id_document?.originalname || null,
+                id_document_size: id_document?.size || null,
+                id_document_mime: id_document?.mimetype || null,
+                selfie_photo_name: selfie_photo?.originalname || null,
+                selfie_photo_size: selfie_photo?.size || null,
+                selfie_photo_mime: selfie_photo?.mimetype || null,
+                uploaded_at: new Date()
+            };
+
             const user = await User.findByIdAndUpdate(
                 userId,
-                { kyc_status: 'verified' },
+                { 
+                    kyc_status: 'verified',
+                    kyc_documents
+                },
                 { new: true }
             );
 
             res.json({
-                message: 'KYC document uploaded successfully',
-                kyc_status: user.kyc_status
+                message: 'KYC documents uploaded and verified successfully',
+                kyc_status: user.kyc_status,
+                verified_at: kyc_documents.uploaded_at
             });
         } catch (error) {
             console.error(error);
@@ -118,6 +159,29 @@ class UserController {
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Failed to fetch balance' });
+        }
+    }
+
+    async getUserProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const user = await User.findById(userId).select('-password');
+
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            res.json({
+                id: user._id,
+                email: user.email,
+                full_name: user.full_name,
+                kyc_status: user.kyc_status || 'pending',
+                account_status: user.account_status || 'active',
+                registration_status: user.registration_status || 'completed'
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to fetch user profile' });
         }
     }
 }
