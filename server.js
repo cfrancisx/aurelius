@@ -41,13 +41,20 @@ app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Verify MongoDB URI is available
+const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://aurelius_admin:Admin12345@cluster0.3mottii.mongodb.net/?appName=Cluster0';
+if (!mongoUri) {
+    console.error('❌ MONGODB_URI environment variable is not set!');
+    process.exit(1);
+}
+
 // Session management with MongoDB Store
 app.use(session({
     secret: process.env.SESSION_SECRET || 'aurelius-bank-session-secret-key',
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({
-        mongoUrl: process.env.MONGODB_URI,
+        mongoUrl: mongoUri,
         touchAfter: 24 * 3600 // lazy session update interval (24 hours)
     }),
     cookie: {
