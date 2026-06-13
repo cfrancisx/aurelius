@@ -1,0 +1,30 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card representation -->
+  <rect x="30" y="50" width="140" height="90" rx="8" fill="#003D82" stroke="#0052A3" stroke-width="2"/>
+  
+  <!-- Card chip -->
+  <rect x="45" y="65" width="25" height="25" rx="3" fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
+  <line x1="50" y1="70" x2="65" y2="70" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+  <line x1="50" y1="75" x2="65" y2="75" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+  <line x1="50" y1="80" x2="65" y2="80" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+  <line x1="50" y1="85" x2="65" y2="85" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+  
+  <!-- Cardholder name -->
+  <text x="85" y="110" font-size="14" fill="white" font-family="monospace">CARD HOLDER</text>
+  
+  <!-- Card number dots -->
+  <circle cx="50" cy="130" r="2" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="65" cy="130" r="2" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="80" cy="130" r="2" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="95" cy="130" r="2" fill="rgba(255,255,255,0.6)"/>
+  <text x="120" y="134" font-size="12" fill="rgba(255,255,255,0.8)" font-family="monospace">1234</text>
+  
+  <!-- Card validity -->
+  <text x="45" y="150" font-size="10" fill="rgba(255,255,255,0.5)">VALID THRU</text>
+  <text x="130" y="150" font-size="10" fill="rgba(255,255,255,0.5)">CVV</text>
+  <text x="45" y="162" font-size="12" fill="rgba(255,255,255,0.8)" font-family="monospace">12/26</text>
+  <text x="130" y="162" font-size="12" fill="rgba(255,255,255,0.8)" font-family="monospace">***</text>
+  
+  <!-- Visa/Mastercard-like logo area -->
+  <circle cx="155" cy="80" r="15" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+</svg>

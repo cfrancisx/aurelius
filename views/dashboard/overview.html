@@ -386,47 +386,65 @@
 
             <div class="quick-stats">
                 <div class="quick-stat">
-                    <div class="stat-label">💰 Savings</div>
+                    <div style="margin: -1.5rem -1.5rem 1rem; padding: 1rem; background: linear-gradient(135deg, #003D82 0%, #0052A3 100%); border-radius: 0.75rem 0.75rem 0 0; display: flex; justify-content: center;">
+                        <img src="/images/analytics-icon.svg" alt="Savings" style="width: 50px; height: 50px; opacity: 0.8;">
+                    </div>
+                    <div class="stat-label">Savings</div>
                     <div class="stat-value">£0</div>
                 </div>
                 <div class="quick-stat green">
-                    <div class="stat-label">📈 Investments</div>
+                    <div style="margin: -1.5rem -1.5rem 1rem; padding: 1rem; background: linear-gradient(135deg, #00AA62 0%, #00D966 100%); border-radius: 0.75rem 0.75rem 0 0; display: flex; justify-content: center;">
+                        <img src="/images/analytics-icon.svg" alt="Investments" style="width: 50px; height: 50px; opacity: 0.9; filter: brightness(1.2);">
+                    </div>
+                    <div class="stat-label">Investments</div>
                     <div class="stat-value">£0</div>
                 </div>
                 <div class="quick-stat orange">
-                    <div class="stat-label">💳 Spending</div>
+                    <div style="margin: -1.5rem -1.5rem 1rem; padding: 1rem; background: linear-gradient(135deg, #FF6B35 0%, #FF8A50 100%); border-radius: 0.75rem 0.75rem 0 0; display: flex; justify-content: center;">
+                        <img src="/images/card-icon.svg" alt="Spending" style="width: 50px; height: 50px; opacity: 0.9;">
+                    </div>
+                    <div class="stat-label">Spending</div>
                     <div class="stat-value">£0</div>
                 </div>
                 <div class="quick-stat purple">
-                    <div class="stat-label">🎯 Goals</div>
+                    <div style="margin: -1.5rem -1.5rem 1rem; padding: 1rem; background: linear-gradient(135deg, #7C3AED 0%, #9D4EDD 100%); border-radius: 0.75rem 0.75rem 0 0; display: flex; justify-content: center;">
+                        <img src="/images/user-profile-icon.svg" alt="Goals" style="width: 50px; height: 50px; opacity: 0.9; filter: brightness(1.1);">
+                    </div>
+                    <div class="stat-label">Goals</div>
                     <div class="stat-value">£0</div>
                 </div>
             </div>
             
             <div class="quick-actions">
                 <div class="action-card" onclick="window.location.href='/dashboard/transfers'">
-                    <span class="action-icon">💸</span>
+                    <img src="/images/transfer-icon.svg" alt="Send Money" style="width: 50px; height: 50px; margin: 0 auto 0.75rem; display: block;">
                     <span class="action-label">Send Money</span>
                 </div>
                 <div class="action-card" onclick="window.location.href='/dashboard/payments'">
-                    <span class="action-icon">📱</span>
+                    <img src="/images/wallet-icon.svg" alt="Pay Bills" style="width: 50px; height: 50px; margin: 0 auto 0.75rem; display: block;">
                     <span class="action-label">Pay Bills</span>
                 </div>
                 <div class="action-card" onclick="window.location.href='/dashboard/statements'">
-                    <span class="action-icon">📄</span>
+                    <img src="/images/statement-icon.svg" alt="View Statements" style="width: 50px; height: 50px; margin: 0 auto 0.75rem; display: block;">
                     <span class="action-label">View Statements</span>
                 </div>
                 <div class="action-card" onclick="window.location.href='/dashboard/support'">
-                    <span class="action-icon">💬</span>
+                    <img src="/images/support-icon.svg" alt="Contact Support" style="width: 50px; height: 50px; margin: 0 auto 0.75rem; display: block;">
                     <span class="action-label">Contact Support</span>
                 </div>
             </div>
 
-            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">📊 Your Accounts</h2>
+            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">
+                <img src="/images/analytics-icon.svg" alt="Accounts" style="width: 32px; height: 32px; margin-right: 0.75rem; vertical-align: middle;">
+                Your Accounts
+            </h2>
             
             <div id="accountsGrid"></div>
 
-            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">💳 Recent Transactions</h2>
+            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">
+                <img src="/images/card-icon.svg" alt="Transactions" style="width: 32px; height: 32px; margin-right: 0.75rem; vertical-align: middle;">
+                Recent Transactions
+            </h2>
             
             <div class="transactions-card">
                 <div class="transaction-list" id="transactionsList">

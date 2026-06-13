@@ -1,0 +1,14 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Lock body -->
+  <rect x="50" y="90" width="100" height="90" rx="8" fill="#003D82" stroke="#0052A3" stroke-width="2"/>
+  
+  <!-- Lock shackle (top) -->
+  <path d="M 70 90 Q 70 30 100 30 Q 130 30 130 90" fill="none" stroke="#003D82" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Keyhole -->
+  <circle cx="100" cy="120" r="8" fill="#00AA62"/>
+  <path d="M 100 128 L 100 145" stroke="#00AA62" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Checkmark inside -->
+  <path d="M 75 155 L 90 170 L 125 135" fill="none" stroke="#00AA62" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

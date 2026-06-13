@@ -1,0 +1,18 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Wallet body -->
+  <rect x="25" y="50" width="150" height="100" rx="8" fill="none" stroke="#0052A3" stroke-width="3"/>
+  
+  <!-- Wallet flap -->
+  <path d="M 25 60 Q 25 50 35 50 L 165 50 Q 175 50 175 60 Z" fill="#0052A3" opacity="0.3"/>
+  
+  <!-- Coins inside -->
+  <circle cx="60" cy="100" r="20" fill="#FFD700" stroke="#FFA500" stroke-width="2" opacity="0.8"/>
+  <text x="60" y="107" font-size="24" fill="#FFA500" text-anchor="middle" font-weight="bold">£</text>
+  
+  <circle cx="120" cy="95" r="18" fill="#FFD700" stroke="#FFA500" stroke-width="2" opacity="0.6"/>
+  <text x="120" y="102" font-size="20" fill="#FFA500" text-anchor="middle">€</text>
+  
+  <!-- Card slot indicator -->
+  <line x1="140" y1="70" x2="140" y2="120" stroke="#0052A3" stroke-width="2" opacity="0.5"/>
+  <circle cx="140" cy="75" r="3" fill="#00AA62"/>
+</svg>

@@ -1,0 +1,29 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Phone body -->
+  <rect x="50" y="20" width="100" height="160" rx="10" fill="#003D82" stroke="#0052A3" stroke-width="2"/>
+  
+  <!-- Phone screen -->
+  <rect x="60" y="35" width="80" height="120" rx="6" fill="#F5F7FA"/>
+  
+  <!-- Screen content - payment icon -->
+  <defs>
+    <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003D82;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00AA62;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Card representation on screen -->
+  <rect x="65" y="45" width="70" height="40" rx="4" fill="url(#phoneGrad)"/>
+  <text x="100" y="75" font-size="14" fill="white" text-anchor="middle">💳</text>
+  
+  <!-- Status bars -->
+  <rect x="65" y="95" width="65" height="6" rx="2" fill="#00AA62" opacity="0.3"/>
+  <rect x="65" y="108" width="65" height="6" rx="2" fill="#0052A3" opacity="0.2"/>
+  
+  <!-- Phone button -->
+  <rect x="72" y="150" width="56" height="8" rx="4" fill="#0052A3" opacity="0.5"/>
+  
+  <!-- Wave symbol on bottom -->
+  <path d="M 55 165 Q 60 162 65 165 Q 70 168 75 165 Q 80 162 85 165 Q 90 168 95 165 Q 100 162 105 165" fill="none" stroke="#0052A3" stroke-width="1.5" opacity="0.5"/>
+</svg>

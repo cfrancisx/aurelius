@@ -1,0 +1,17 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#0052A3" stroke-width="2" opacity="0.5"/>
+  
+  <!-- User head -->
+  <circle cx="100" cy="70" r="28" fill="#003D82"/>
+  
+  <!-- User shoulders/body -->
+  <ellipse cx="100" cy="130" rx="45" ry="35" fill="#0052A3"/>
+  
+  <!-- Profile badge -->
+  <circle cx="135" cy="55" r="18" fill="#00AA62"/>
+  <text x="135" y="62" font-size="18" fill="white" text-anchor="middle" font-weight="bold">✓</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#00AA62" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
+</svg>

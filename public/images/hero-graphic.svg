@@ -1,0 +1,34 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background card 1 -->
+  <rect x="20" y="40" width="160" height="200" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  
+  <!-- Background card 2 -->
+  <rect x="220" y="80" width="160" height="180" rx="12" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" stroke-width="2" transform="rotate(-5 300 170)"/>
+  
+  <!-- Main currency symbols -->
+  <text x="80" y="120" font-size="48" fill="rgba(255,255,255,0.9)" text-anchor="middle">£</text>
+  <text x="310" y="180" font-size="48" fill="rgba(255,255,255,0.7)" text-anchor="middle">€</text>
+  <text x="150" y="300" font-size="48" fill="rgba(255,255,255,0.6)" text-anchor="middle">$</text>
+  
+  <!-- Connected dots network -->
+  <circle cx="100" cy="100" r="3" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="300" cy="150" r="3" fill="rgba(255,255,255,0.5)"/>
+  <circle cx="200" cy="280" r="3" fill="rgba(255,255,255,0.5)"/>
+  
+  <line x1="100" y1="100" x2="300" y2="150" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  <line x1="300" y1="150" x2="200" y2="280" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  <line x1="100" y1="100" x2="200" y2="280" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  
+  <!-- Upward arrow trend -->
+  <polyline points="150,320 150,280 170,300" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Security lock -->
+  <rect x="250" y="240" width="60" height="80" rx="5" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+  <circle cx="280" cy="265" r="8" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+  <rect x="275" y="275" width="10" height="35" rx="2" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+  
+  <!-- Globe representation -->
+  <circle cx="80" cy="280" r="25" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+  <line x1="55" y1="280" x2="105" y2="280" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+  <path d="M 80 255 Q 95 280 80 305" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+</svg>

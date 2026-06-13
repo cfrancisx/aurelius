@@ -1,0 +1,16 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chat bubble 1 -->
+  <path d="M 25 60 Q 25 45 40 45 L 130 45 Q 145 45 145 60 L 145 100 Q 145 115 130 115 L 55 115 L 35 130 L 45 115 L 40 115 Q 25 115 25 100 Z" 
+        fill="#0052A3" opacity="0.2" stroke="#0052A3" stroke-width="2"/>
+  
+  <!-- Chat bubble 2 -->
+  <path d="M 55 130 Q 55 120 65 120 L 155 120 Q 165 120 165 130 L 165 160 Q 165 170 155 170 L 100 170 L 85 180 L 95 170 L 65 170 Q 55 170 55 160 Z" 
+        fill="#00AA62" opacity="0.2" stroke="#00AA62" stroke-width="2"/>
+  
+  <!-- Checkmarks in bubbles -->
+  <path d="M 50 80 L 60 90 L 75 70" fill="none" stroke="#0052A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Support badge -->
+  <circle cx="155" cy="40" r="20" fill="#FF6B35" stroke="#FF8A50" stroke-width="2"/>
+  <text x="155" y="47" font-size="18" fill="white" text-anchor="middle" font-weight="bold">?</text>
+</svg>
