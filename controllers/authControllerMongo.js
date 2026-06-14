@@ -19,8 +19,9 @@ class AuthController {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            const accountNumber = 'ACC' + Math.floor(Math.random() * 1000000000);
-            const userAccountNumber = 'AUB' + Math.floor(Math.random() * 1000000000);
+            // One account number shared by the User record and its Account, so admin
+            // balance operations (which look up Account by this number) can find it.
+            const accountNumber = 'AUB' + Math.floor(Math.random() * 1000000000);
 
             const user = await User.create({
                 account_number: accountNumber,
@@ -37,7 +38,7 @@ class AuthController {
             // Create account
             await Account.create({
                 user_id: user._id,
-                account_number: userAccountNumber,
+                account_number: accountNumber,
                 currency: 'GBP',
                 available_balance: 0,
                 ledger_balance: 0,

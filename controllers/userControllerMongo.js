@@ -88,30 +88,31 @@ class UserController {
                 });
             }
 
-            // Update user with KYC status and file information
+            // Persist the actual file bytes (base64) so an admin can review them.
             const kyc_documents = {
                 id_document_name: id_document?.originalname || null,
-                id_document_size: id_document?.size || null,
                 id_document_mime: id_document?.mimetype || null,
+                id_document_data: id_document ? id_document.buffer.toString('base64') : null,
                 selfie_photo_name: selfie_photo?.originalname || null,
-                selfie_photo_size: selfie_photo?.size || null,
                 selfie_photo_mime: selfie_photo?.mimetype || null,
+                selfie_photo_data: selfie_photo ? selfie_photo.buffer.toString('base64') : null,
                 uploaded_at: new Date()
             };
 
+            // Mark as pending review — an admin approves/rejects after viewing the documents.
             const user = await User.findByIdAndUpdate(
                 userId,
-                { 
-                    kyc_status: 'verified',
+                {
+                    kyc_status: 'pending',
                     kyc_documents
                 },
                 { new: true }
             );
 
             res.json({
-                message: 'KYC documents uploaded and verified successfully',
+                message: 'KYC documents uploaded successfully and submitted for review',
                 kyc_status: user.kyc_status,
-                verified_at: kyc_documents.uploaded_at
+                uploaded_at: kyc_documents.uploaded_at
             });
         } catch (error) {
             console.error(error);

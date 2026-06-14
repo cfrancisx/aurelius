@@ -28,6 +28,15 @@ const userSchema = new mongoose.Schema({
     account_type: { type: String, default: 'personal' },
     account_status: { type: String, default: 'pending' },
     kyc_status: { type: String, default: 'pending' },
+    kyc_documents: {
+        id_document_name: String,
+        id_document_mime: String,
+        id_document_data: String,   // base64-encoded file bytes
+        selfie_photo_name: String,
+        selfie_photo_mime: String,
+        selfie_photo_data: String,  // base64-encoded file bytes
+        uploaded_at: Date
+    },
     two_factor_secret: String,
     two_factor_enabled: { type: Boolean, default: false },
     created_at: { type: Date, default: Date.now },

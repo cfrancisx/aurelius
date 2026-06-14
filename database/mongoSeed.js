@@ -114,8 +114,9 @@ async function seedMongoDB() {
             const existingUser = await User.findOne({ email: userData.email });
             
             if (!existingUser) {
-                const accountNumber = 'ACC' + Math.floor(Math.random() * 1000000000);
-                const userAccountNumber = 'AUB' + Math.floor(Math.random() * 1000000000);
+                // Shared account number for both the User and its Account so the admin
+                // balance tools can locate the account by the number shown in the UI.
+                const accountNumber = 'AUB' + Math.floor(Math.random() * 1000000000);
                 const hashedPassword = await bcrypt.hash('Password@123', 10);
                 
                 const user = await User.create({
@@ -133,7 +134,7 @@ async function seedMongoDB() {
                 // Create account for user
                 await Account.create({
                     user_id: user._id,
-                    account_number: userAccountNumber,
+                    account_number: accountNumber,
                     currency: 'GBP',
                     available_balance: 5000,
                     ledger_balance: 5000,
