@@ -71,6 +71,71 @@
             line-height: 1.6;
         }
 
+        .hero-image-container {
+            position: relative;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-image {
+            position: absolute;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 61, 130, 0.2);
+            object-fit: cover;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .main-image {
+            width: 320px;
+            height: 350px;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            animation-delay: 0s;
+        }
+
+        .secondary-image {
+            width: 180px;
+            height: 180px;
+            top: 0;
+            left: 5%;
+            z-index: 2;
+            animation-delay: 0.5s;
+            opacity: 0.85;
+        }
+
+        .tertiary-image {
+            width: 160px;
+            height: 160px;
+            bottom: 20px;
+            right: 8%;
+            z-index: 1;
+            animation-delay: 1s;
+            opacity: 0.8;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .secondary-image {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .tertiary-image {
+            animation: float 5s ease-in-out infinite;
+        }
+
         .hero-image {
             font-size: 8rem;
             text-align: center;
@@ -296,8 +361,52 @@
                 font-size: 2.25rem;
             }
 
-            .hero-image {
-                font-size: 5rem;
+            .hero-image-container {
+                height: 300px;
+                margin-top: 2rem;
+            }
+
+            .main-image {
+                width: 280px;
+                height: 300px;
+            }
+
+            .secondary-image {
+                width: 120px;
+                height: 120px;
+                left: 2%;
+            }
+
+            .tertiary-image {
+                width: 100px;
+                height: 100px;
+                right: 2%;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero-image-container {
+                height: 250px;
+            }
+
+            .main-image {
+                width: 200px;
+                height: 220px;
+            }
+
+            .secondary-image,
+            .tertiary-image {
+                display: none;
+            }
+        }
             }
 
             .stat-number {
@@ -401,8 +510,13 @@
                 <p>Experience premium banking with zero fees, instant transfers, and 24/7 dedicated support.</p>
                 <a href="/register" class="btn btn-primary">Get Started Free</a>
             </div>
-            <div class="hero-image">
-                <img src="/images/hero-graphic.svg" alt="Global Banking" style="width: 100%; max-width: 300px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));">
+            <div class="hero-image-container">
+                <div class="hero-image-wrapper">
+                    <!-- Professional bankers image -->
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=600&fit=crop" alt="Professional banking team" class="hero-image main-image">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop" alt="Finance professional" class="hero-image secondary-image">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" alt="Banking expert" class="hero-image tertiary-image">
+                </div>
             </div>
         </div>
     </section>
