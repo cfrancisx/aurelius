@@ -128,7 +128,8 @@ async function seedMongoDB() {
                     password_hash: hashedPassword,
                     account_type: userData.account_type,
                     account_status: userData.account_status,
-                    kyc_status: userData.kyc_status
+                    kyc_status: userData.kyc_status,
+                    transaction_pin: await bcrypt.hash('1234', 10) // demo PIN for sample users
                 });
                 
                 // Create account for user

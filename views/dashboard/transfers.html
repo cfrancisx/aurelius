@@ -117,6 +117,11 @@
                     Please complete your KYC verification to enable transfers. <a href="/dashboard/kyc">Verify now →</a>
                 </div>
 
+                <div id="pinWarning" class="alert-banner warning">
+                    ⚠️ <strong>Transaction PIN Required</strong><br>
+                    Set up a 4-digit transaction PIN to authorize transfers. <a href="/dashboard/settings">Set PIN →</a>
+                </div>
+
                 <form id="transferForm" class="transfer-form">
                     <div class="form-group">
                         <label for="fromAccount">From Account <span class="loading" id="accountsLoading" style="display: none;"></span></label>
@@ -142,7 +147,13 @@
                         <label for="narration">Description (Optional)</label>
                         <input type="text" id="narration" class="form-control" placeholder="e.g., Payment for invoice #123">
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label for="txnPin">Transaction PIN</label>
+                        <input type="password" id="txnPin" class="form-control" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="••••" autocomplete="off" required>
+                        <small style="color: #666;">Enter your 4-digit PIN to authorize this transfer</small>
+                    </div>
+
                     <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
                         <span id="btnText">Send Transfer</span>
                     </button>
@@ -177,6 +188,7 @@
     <script>
         let accounts = [];
         let userKycStatus = 'pending';
+        let hasPin = false;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -245,23 +257,41 @@
 
         async function checkKYCStatus() {
             try {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                userKycStatus = user.kyc_status || 'pending';
-                
+                // Read the real verification status from the server rather than
+                // localStorage (which login does not populate).
+                const response = await fetch('/api/user-profile', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    userKycStatus = user.kyc_status || 'pending';
+                    hasPin = !!user.has_transaction_pin;
+                } else {
+                    userKycStatus = 'pending';
+                    hasPin = false;
+                }
+
                 const kycWarning = document.getElementById('kycWarning');
+                const pinWarning = document.getElementById('pinWarning');
                 const form = document.getElementById('transferForm');
-                
-                if (userKycStatus !== 'verified') {
-                    kycWarning.style.display = 'block';
+
+                // Transfers require both a verified account and a transaction PIN.
+                const notVerified = userKycStatus !== 'verified';
+                kycWarning.style.display = notVerified ? 'block' : 'none';
+                pinWarning.style.display = (!notVerified && !hasPin) ? 'block' : 'none';
+
+                if (notVerified || !hasPin) {
                     form.style.opacity = '0.6';
                     form.style.pointerEvents = 'none';
                 } else {
-                    kycWarning.style.display = 'none';
                     form.style.opacity = '1';
                     form.style.pointerEvents = 'auto';
                 }
             } catch (error) {
-                console.error('Error checking KYC status:', error);
+                console.error('Error checking transfer eligibility:', error);
             }
         }
 
@@ -273,10 +303,16 @@
                 return;
             }
 
+            if (!hasPin) {
+                showAlert('Please set your transaction PIN in Settings before making transfers.', 'warning');
+                return;
+            }
+
             const fromAccount = document.getElementById('fromAccount').value;
             const receiverAccount = document.getElementById('receiverAccount').value.trim();
             const amount = parseFloat(document.getElementById('amount').value);
             const narration = document.getElementById('narration').value.trim();
+            const pin = document.getElementById('txnPin').value.trim();
 
             // Validation
             if (!fromAccount) {
@@ -296,6 +332,11 @@
 
             if (isNaN(amount) || amount <= 0) {
                 showAlert('Please enter a valid amount.', 'error');
+                return;
+            }
+
+            if (!/^\d{4}$/.test(pin)) {
+                showAlert('Enter your 4-digit transaction PIN.', 'error');
                 return;
             }
 
@@ -322,7 +363,8 @@
                         sender_account: fromAccount,
                         receiver_account: receiverAccount,
                         amount,
-                        narration
+                        narration,
+                        pin
                     })
                 });
 

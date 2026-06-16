@@ -44,6 +44,7 @@ module.exports = function() {
     router.put('/customers/:id/kyc', (req, res) => adminController.updateKYCStatus(req, res));
 
     router.get('/transactions', (req, res) => adminController.getTransactions(req, res));
+    router.get('/audit-logs', (req, res) => adminController.getAuditLogs(req, res));
     router.get('/dashboard/stats', (req, res) => adminController.getDashboardStats(req, res));
     
     // Transaction approval/decline

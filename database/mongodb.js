@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema({
     },
     two_factor_secret: String,
     two_factor_enabled: { type: Boolean, default: false },
+    transaction_pin: String, // bcrypt hash of the 4-digit transfer PIN
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });

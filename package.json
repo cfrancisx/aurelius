@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "init-db": "node database/init.js",
     "seed": "node database/seed.js"
   },
   "dependencies": {
@@ -25,8 +24,6 @@
     "nodemailer": "^6.9.1",
     "qrcode": "^1.5.1",
     "speakeasy": "^2.0.0",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.6",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

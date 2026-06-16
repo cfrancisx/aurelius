@@ -27,6 +27,7 @@ module.exports = function() {
 
     router.get('/accounts', (req, res) => userController.getAccounts(req, res));
     router.get('/user-profile', (req, res) => userController.getUserProfile(req, res));
+    router.post('/transaction-pin', (req, res) => userController.setTransactionPin(req, res));
     router.post('/transfer', (req, res) => userController.transfer(req, res));
     router.get('/transactions', (req, res) => userController.getTransactions(req, res));
     router.get('/balance', (req, res) => userController.getBalance(req, res));

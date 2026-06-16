@@ -173,23 +173,6 @@
             margin-bottom: 1rem;
         }
 
-        .camera-btn {
-            background: #003D82;
-            color: white;
-            border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 0.5rem;
-            width: 100%;
-        }
-
-        .camera-btn:hover {
-            background: #0052A3;
-        }
-
         .file-preview {
             display: none;
             margin-top: 1rem;
@@ -405,9 +388,6 @@
                             <div class="upload-text">Upload ID Card</div>
                             <div class="upload-hint">PNG, JPG, PDF (Max 5MB)</div>
                             <input type="file" id="idInput" accept="image/*,.pdf" onchange="handleIdFileSelect(event)">
-                            <button type="button" class="camera-btn" onclick="event.preventDefault(); captureIdPhoto()">
-                                📸 Take Photo
-                            </button>
                         </div>
                         <div class="file-preview" id="idPreview">
                             <img id="idPreviewImage" style="display: none;">
@@ -425,9 +405,6 @@
                             <div class="upload-text">Upload Your Photo</div>
                             <div class="upload-hint">PNG, JPG (Max 5MB)</div>
                             <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoFileSelect(event)">
-                            <button type="button" class="camera-btn" onclick="event.preventDefault(); capturePhoto()">
-                                📸 Take Selfie
-                            </button>
                         </div>
                         <div class="file-preview" id="photoPreview">
                             <img id="photoPreviewImage" style="display: none;">
@@ -456,14 +433,9 @@
         </div>
     </div>
 
-    <!-- Hidden canvas for camera capture -->
-    <canvas id="canvas" style="display: none;"></canvas>
-
     <script>
         let selectedIdFile = null;
         let selectedPhotoFile = null;
-        let idStream = null;
-        let photoStream = null;
 
         function handleIdFileSelect(event) {
             const file = event.target.files[0];
@@ -549,146 +521,6 @@
             if (selectedIdFile && selectedPhotoFile) {
                 submitBtn.disabled = false;
             }
-        }
-
-        function captureIdPhoto() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showAlert('Camera not supported on this device. Please upload a file instead.', 'error');
-                return;
-            }
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    createCameraModal('ID Card', stream, 'id');
-                })
-                .catch(err => {
-                    console.error('Camera access denied:', err);
-                    showAlert('Camera access denied. Please upload a file instead.', 'error');
-                });
-        }
-
-        function capturePhoto() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showAlert('Camera not supported on this device. Please upload a file instead.', 'error');
-                return;
-            }
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    createCameraModal('Your Photo', stream, 'photo');
-                })
-                .catch(err => {
-                    console.error('Camera access denied:', err);
-                    showAlert('Camera access denied. Please upload a file instead.', 'error');
-                });
-        }
-
-        function createCameraModal(title, stream, type) {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: black;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                z-index: 9999;
-            `;
-
-            const videoContainer = document.createElement('div');
-            videoContainer.style.cssText = `
-                position: relative;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            `;
-
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            video.autoplay = true;
-            video.style.cssText = `
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                background: black;
-            `;
-
-            const controls = document.createElement('div');
-            controls.style.cssText = `
-                position: absolute;
-                bottom: 20px;
-                display: flex;
-                gap: 10px;
-                z-index: 10000;
-            `;
-
-            const captureBtn = document.createElement('button');
-            captureBtn.textContent = '📸 Capture';
-            captureBtn.style.cssText = `
-                padding: 12px 20px;
-                font-size: 16px;
-                background: #00AA62;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-            `;
-
-            const closeBtn = document.createElement('button');
-            closeBtn.textContent = '✕ Cancel';
-            closeBtn.style.cssText = `
-                padding: 12px 20px;
-                font-size: 16px;
-                background: #F44336;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-            `;
-
-            captureBtn.addEventListener('click', () => {
-                const canvas = document.getElementById('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0);
-
-                canvas.toBlob(blob => {
-                    if (type === 'id') {
-                        selectedIdFile = new File([blob], `id-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                        document.getElementById('idInput').files = new DataTransfer().items.add(selectedIdFile);
-                        showIdPreview(selectedIdFile);
-                    } else {
-                        selectedPhotoFile = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                        document.getElementById('photoInput').files = new DataTransfer().items.add(selectedPhotoFile);
-                        showPhotoPreview(selectedPhotoFile);
-                    }
-                    stream.getTracks().forEach(track => track.stop());
-                    modal.remove();
-                    checkSubmitButton();
-                }, 'image/jpeg', 0.95);
-            });
-
-            closeBtn.addEventListener('click', () => {
-                stream.getTracks().forEach(track => track.stop());
-                modal.remove();
-            });
-
-            controls.appendChild(captureBtn);
-            controls.appendChild(closeBtn);
-            videoContainer.appendChild(video);
-            videoContainer.appendChild(controls);
-            modal.appendChild(videoContainer);
-            document.body.appendChild(modal);
         }
 
         function showAlert(message, type) {

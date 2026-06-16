@@ -6,6 +6,27 @@
     <title>Settings - Aurelius Bank</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .settings-alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .settings-alert.show { display: block; }
+        .settings-alert.success { background: #E8F5E9; border: 1px solid #4CAF50; color: #2E7D32; }
+        .settings-alert.error { background: #FFEBEE; border: 1px solid #F44336; color: #C62828; }
+        .pin-status {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .pin-status.set { background: #E8F5E9; color: #2E7D32; }
+        .pin-status.unset { background: #FFF3E0; color: #E65100; }
+        .settings-form { max-width: 420px; }
+    </style>
 </head>
 <body>
     <div class="dashboard">
@@ -28,13 +49,143 @@
                 <h1>Settings</h1>
                 <button id="logoutBtn" class="btn btn-outline">Logout</button>
             </header>
+
             <div class="card">
-                <h3>Account Settings</h3>
-                <p>Coming Soon</p>
+                <h3>🔐 Transaction PIN</h3>
+                <p style="color:#666; margin-bottom:1rem;">
+                    Your 4-digit transaction PIN authorizes every transfer before it's sent for admin approval.
+                </p>
+
+                <div id="pinStatus" class="pin-status unset">Checking PIN status...</div>
+                <div id="settingsAlert" class="settings-alert"></div>
+
+                <form id="pinForm" class="settings-form">
+                    <div class="form-group" id="currentPinGroup" style="display:none;">
+                        <label for="currentPin">Current PIN</label>
+                        <input type="password" id="currentPin" class="form-control" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="••••" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPin">New 4-digit PIN</label>
+                        <input type="password" id="newPin" class="form-control" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="••••" autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPin">Confirm New PIN</label>
+                        <input type="password" id="confirmPin" class="form-control" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="••••" autocomplete="off" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="pinSubmitBtn">Save PIN</button>
+                </form>
             </div>
         </main>
     </div>
-    <script src="/js/api.js"></script>
-    <script src="/js/dashboard.js"></script>
+
+    <script>
+        let hasPin = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+            loadPinStatus();
+        });
+
+        async function loadPinStatus() {
+            try {
+                const res = await fetch('/api/user-profile', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (res.ok) {
+                    const user = await res.json();
+                    hasPin = !!user.has_transaction_pin;
+                }
+            } catch (e) {
+                console.error('Failed to load profile:', e);
+            }
+            renderPinStatus();
+        }
+
+        function renderPinStatus() {
+            const status = document.getElementById('pinStatus');
+            const currentGroup = document.getElementById('currentPinGroup');
+            const submitBtn = document.getElementById('pinSubmitBtn');
+
+            if (hasPin) {
+                status.className = 'pin-status set';
+                status.textContent = '✅ A transaction PIN is set on your account.';
+                currentGroup.style.display = 'block';
+                document.getElementById('currentPin').required = true;
+                submitBtn.textContent = 'Change PIN';
+            } else {
+                status.className = 'pin-status unset';
+                status.textContent = '⚠️ You have not set a transaction PIN yet. Set one to enable transfers.';
+                currentGroup.style.display = 'none';
+                document.getElementById('currentPin').required = false;
+                submitBtn.textContent = 'Set PIN';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('settingsAlert');
+            alert.className = `settings-alert show ${type}`;
+            alert.textContent = message;
+        }
+
+        document.getElementById('pinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPin = document.getElementById('currentPin').value.trim();
+            const newPin = document.getElementById('newPin').value.trim();
+            const confirmPin = document.getElementById('confirmPin').value.trim();
+
+            if (!/^\d{4}$/.test(newPin)) {
+                showAlert('PIN must be exactly 4 digits.', 'error');
+                return;
+            }
+            if (newPin !== confirmPin) {
+                showAlert('New PIN and confirmation do not match.', 'error');
+                return;
+            }
+            if (hasPin && !/^\d{4}$/.test(currentPin)) {
+                showAlert('Enter your current 4-digit PIN to change it.', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('pinSubmitBtn');
+            submitBtn.disabled = true;
+            const original = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                const res = await fetch('/api/transaction-pin', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ current_pin: currentPin, pin: newPin })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to save PIN');
+
+                hasPin = true;
+                showAlert('✅ ' + data.message, 'success');
+                document.getElementById('pinForm').reset();
+                renderPinStatus();
+            } catch (error) {
+                showAlert('❌ ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = original;
+            }
+        });
+    </script>
 </body>
 </html>

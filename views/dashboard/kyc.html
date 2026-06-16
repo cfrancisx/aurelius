@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/dashboard.css">
     <style>
         .kyc-container {
-            max-width: 600px;
+            max-width: 720px;
             margin: 2rem auto;
             background: white;
             border-radius: 1rem;
@@ -50,6 +50,12 @@
             color: #E65100;
         }
 
+        .kyc-status.rejected {
+            background: #FFEBEE;
+            border: 2px solid #F44336;
+            color: #C62828;
+        }
+
         .kyc-status .status-icon {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -59,20 +65,31 @@
             margin: 0.5rem 0;
         }
 
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
         .kyc-upload-section {
             border: 2px dashed var(--primary);
             border-radius: 0.75rem;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
             background: #F5F7FA;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .kyc-upload-section:hover {
             background: #EEF2F8;
             border-color: #0052A3;
+        }
+
+        .kyc-upload-section.completed {
+            border-color: #00AA62;
+            background: #F1F8F5;
         }
 
         .kyc-upload-section input[type="file"] {
@@ -81,43 +98,49 @@
 
         .upload-icon {
             font-size: 2.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
-        .upload-text {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
+        .upload-label {
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
             margin-bottom: 0.5rem;
         }
 
         .upload-hint {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             font-style: italic;
         }
 
-        .file-info {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 0.5rem;
+        .file-preview {
             display: none;
+            margin-top: 1rem;
         }
 
-        .file-info.show {
+        .file-preview.show {
             display: block;
         }
 
-        .file-info .file-name {
-            font-weight: 600;
-            color: var(--primary);
-            word-break: break-all;
+        .file-preview img {
+            max-width: 100%;
+            max-height: 140px;
+            border-radius: 0.5rem;
+            border: 1px solid #ddd;
+            margin-bottom: 0.5rem;
         }
 
-        .file-info .file-size {
+        .file-name {
+            font-weight: 600;
+            color: #2E7D32;
+            word-break: break-all;
             font-size: 0.85rem;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
             color: var(--text-secondary);
-            margin-top: 0.25rem;
         }
 
         .kyc-form-group {
@@ -131,19 +154,13 @@
             color: var(--text-primary);
         }
 
-        .kyc-form-group input {
+        .kyc-form-group select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #DDD;
             border-radius: 0.5rem;
             font-size: 0.95rem;
             box-sizing: border-box;
-        }
-
-        .kyc-form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 61, 130, 0.1);
         }
 
         .submit-btn {
@@ -157,10 +174,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s ease;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             background: #0052A3;
         }
 
@@ -221,6 +238,10 @@
                 margin: 1rem;
                 padding: 1.5rem;
             }
+
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -250,7 +271,7 @@
             <div class="kyc-container">
                 <div class="kyc-header">
                     <h2>✅ KYC Verification</h2>
-                    <p>Complete your Know Your Customer verification to unlock all features</p>
+                    <p>Upload a valid ID and a photo of yourself. An administrator will review and verify your account.</p>
                 </div>
 
                 <div id="kycAlert" class="alert"></div>
@@ -258,24 +279,41 @@
                 <div id="kycStatus" class="kyc-status pending">
                     <div class="status-icon">⏳</div>
                     <h3 id="statusTitle">Verification Pending</h3>
-                    <p id="statusText">Upload a valid identification document to verify your account</p>
+                    <p id="statusText">Upload your documents below to begin verification.</p>
                 </div>
 
-                <form id="kycForm" style="display: block;">
-                    <div class="kyc-upload-section" onclick="document.getElementById('documentInput').click()">
-                        <div class="upload-icon">📷</div>
-                        <div class="upload-text"><strong>Click to upload or drag and drop</strong></div>
-                        <div class="upload-hint">PNG, JPG, PDF (Max 5MB)</div>
-                        <input type="file" id="documentInput" accept="image/*,.pdf" onchange="handleFileSelect(event)">
-                        <div class="file-info" id="fileInfo">
-                            <div class="file-name" id="fileName"></div>
-                            <div class="file-size" id="fileSize"></div>
+                <form id="kycForm">
+                    <div class="upload-grid">
+                        <!-- ID document -->
+                        <div class="kyc-upload-section" id="idSection" onclick="document.getElementById('idInput').click()">
+                            <div class="upload-icon">🆔</div>
+                            <span class="upload-label">ID Document</span>
+                            <div class="upload-hint">PNG, JPG, PDF (Max 5MB)</div>
+                            <input type="file" id="idInput" accept="image/*,.pdf" onchange="handleFileSelect(event, 'id')">
+                            <div class="file-preview" id="idPreview">
+                                <img id="idPreviewImage" style="display: none;" alt="ID preview">
+                                <div class="file-name" id="idFileName"></div>
+                                <div class="file-size" id="idFileSize"></div>
+                            </div>
+                        </div>
+
+                        <!-- Selfie / photo -->
+                        <div class="kyc-upload-section" id="photoSection" onclick="document.getElementById('photoInput').click()">
+                            <div class="upload-icon">📷</div>
+                            <span class="upload-label">Your Photo</span>
+                            <div class="upload-hint">PNG, JPG (Max 5MB)</div>
+                            <input type="file" id="photoInput" accept="image/*" onchange="handleFileSelect(event, 'photo')">
+                            <div class="file-preview" id="photoPreview">
+                                <img id="photoPreviewImage" style="display: none;" alt="Photo preview">
+                                <div class="file-name" id="photoFileName"></div>
+                                <div class="file-size" id="photoFileSize"></div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="kyc-form-group">
                         <label for="docType">Document Type</label>
-                        <select id="docType" style="width: 100%; padding: 0.75rem; border: 1px solid #DDD; border-radius: 0.5rem;">
+                        <select id="docType">
                             <option value="">Select Document Type</option>
                             <option value="passport">Passport</option>
                             <option value="driver_license">Driver's License</option>
@@ -292,8 +330,7 @@
                     <ul>
                         <li>Protects you and Aurelius Bank from fraud</li>
                         <li>Complies with financial regulations</li>
-                        <li>Increases your transaction limits</li>
-                        <li>Enables international transfers</li>
+                        <li>Required before you can make transfers</li>
                         <li>Enhances account security</li>
                     </ul>
                 </div>
@@ -301,9 +338,11 @@
         </main>
     </div>
 
-    <script src="/js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        let selectedIdFile = null;
+        let selectedPhotoFile = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login';
@@ -312,35 +351,56 @@
             checkKYCStatus();
         });
 
-        function handleFileSelect(event) {
+        function handleFileSelect(event, kind) {
             const file = event.target.files[0];
             if (!file) return;
 
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
                 showAlert('File size must be less than 5MB', 'error');
-                document.getElementById('documentInput').value = '';
+                event.target.value = '';
                 return;
             }
 
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
-            document.getElementById('fileInfo').classList.add('show');
+            if (kind === 'id') {
+                selectedIdFile = file;
+                showPreview(file, 'idPreview', 'idPreviewImage', 'idFileName', 'idFileSize', 'idSection');
+            } else {
+                selectedPhotoFile = file;
+                showPreview(file, 'photoPreview', 'photoPreviewImage', 'photoFileName', 'photoFileSize', 'photoSection');
+            }
+        }
+
+        function showPreview(file, previewId, imageId, nameId, sizeId, sectionId) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewImage = document.getElementById(imageId);
+                if (file.type.startsWith('image/')) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.style.display = 'none';
+                }
+                document.getElementById(nameId).textContent = file.name;
+                document.getElementById(sizeId).textContent = (file.size / 1024).toFixed(2) + ' KB';
+                document.getElementById(previewId).classList.add('show');
+                document.getElementById(sectionId).classList.add('completed');
+            };
+            reader.readAsDataURL(file);
         }
 
         document.getElementById('kycForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const file = document.getElementById('documentInput').files[0];
             const docType = document.getElementById('docType').value;
 
-            if (!file) {
-                showAlert('Please select a document', 'error');
+            if (!selectedIdFile || !selectedPhotoFile) {
+                showAlert('Please upload both your ID document and your photo.', 'error');
                 return;
             }
 
             if (!docType) {
-                showAlert('Please select document type', 'error');
+                showAlert('Please select your document type.', 'error');
                 return;
             }
 
@@ -349,13 +409,26 @@
             submitBtn.textContent = 'Submitting...';
 
             try {
-                const result = await api.uploadKYC();
-                showAlert('✅ KYC document submitted successfully! Your account is now verified.', 'success');
-                
-                setTimeout(() => {
-                    checkKYCStatus();
-                    document.getElementById('kycForm').style.display = 'none';
-                }, 1000);
+                const formData = new FormData();
+                formData.append('id_document', selectedIdFile);
+                formData.append('selfie_photo', selectedPhotoFile);
+
+                const response = await fetch('/api/kyc/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Upload failed');
+                }
+
+                showAlert('✅ Documents submitted successfully! An administrator will review and verify your account shortly.', 'success');
+                setStatus('pending', 'Verification In Review', 'Your documents have been submitted. An administrator will verify your account shortly.');
+                document.getElementById('kycForm').style.display = 'none';
             } catch (error) {
                 showAlert('❌ ' + error.message, 'error');
                 submitBtn.disabled = false;
@@ -369,14 +442,35 @@
             alert.textContent = message;
         }
 
-        function checkKYCStatus() {
-            // Check if user is already verified
-            const status = localStorage.getItem('kycStatus');
-            if (status === 'verified') {
-                document.getElementById('kycStatus').className = 'kyc-status verified';
-                document.getElementById('statusTitle').textContent = '✅ Verified';
-                document.getElementById('statusText').textContent = 'Your account is KYC verified';
-                document.getElementById('kycForm').style.display = 'none';
+        function setStatus(statusClass, title, text) {
+            const card = document.getElementById('kycStatus');
+            card.className = `kyc-status ${statusClass}`;
+            const icon = statusClass === 'verified' ? '✅' : statusClass === 'rejected' ? '❌' : '⏳';
+            card.querySelector('.status-icon').textContent = icon;
+            document.getElementById('statusTitle').textContent = title;
+            document.getElementById('statusText').textContent = text;
+        }
+
+        async function checkKYCStatus() {
+            try {
+                const response = await fetch('/api/user-profile', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (!response.ok) return;
+
+                const user = await response.json();
+                const status = user.kyc_status || 'pending';
+
+                if (status === 'verified') {
+                    setStatus('verified', '✅ Verified', 'Your account is KYC verified. You can now make transfers.');
+                    document.getElementById('kycForm').style.display = 'none';
+                } else if (status === 'rejected') {
+                    setStatus('rejected', 'Verification Rejected', 'Your previous submission was rejected. Please re-upload clear, valid documents.');
+                } else {
+                    setStatus('pending', 'Verification Pending', 'Upload your documents below to begin verification.');
+                }
+            } catch (error) {
+                console.error('Error loading KYC status:', error);
             }
         }
 

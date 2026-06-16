@@ -473,6 +473,11 @@
                 const user = await response.json();
                 const kycStatus = user.kyc_status || 'pending';
 
+                if (user.full_name) {
+                    const nameEl = document.getElementById('userName');
+                    if (nameEl) nameEl.textContent = user.full_name;
+                }
+
                 let kycHTML = '';
                 
                 if (kycStatus === 'verified') {
@@ -563,14 +568,16 @@
                 document.getElementById('totalNetWorth').textContent = '£' + totalBalance.toFixed(2);
 
                 // Load transactions
+                const myAccountNumbers = new Set(accounts.map(a => a.account_number));
                 const txns = await api.getTransactions();
                 let txnHTML = '';
-                
+
                 if (txns && txns.length > 0) {
                     txns.slice(0, 5).forEach(txn => {
                         const date = new Date(txn.created_at).toLocaleDateString();
                         const amount = parseFloat(txn.amount || 0).toFixed(2);
-                        const isCredit = txn.sender_account !== localStorage.getItem('accountNumber');
+                        // Money is incoming unless one of the user's own accounts is the sender.
+                        const isCredit = !myAccountNumbers.has(txn.sender_account);
                         
                         txnHTML += `
                             <div class="transaction-item">

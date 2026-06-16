@@ -21,13 +21,21 @@
                 <a href="/admin/audit-logs">📝 Audit Logs</a>
             </nav>
         </aside>
-        
+
         <main class="admin-main">
             <header class="admin-header">
                 <h1>Transactions</h1>
                 <button onclick="logout()" class="btn btn-outline">Logout</button>
             </header>
-            
+
+            <div class="card">
+                <h3>⏳ Pending Approvals</h3>
+                <p style="color:#666; margin-bottom:1rem;">Review customer-initiated transfers. Approving one moves the funds; declining cancels it.</p>
+                <div id="pendingTransactions">
+                    <p style="color: #999; text-align: center; padding: 1rem;">Loading pending transfers...</p>
+                </div>
+            </div>
+
             <div class="card">
                 <h3>All Transactions</h3>
                 <div class="table-container">
@@ -50,28 +58,117 @@
             </div>
         </main>
     </div>
-    
+
     <script src="/js/api.js"></script>
-    <script src="/js/admin.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/admin-login';
+                return;
+            }
+            loadPending();
+            loadAll();
+        });
+
+        function fmtGBP(n) {
+            return Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function loadPending() {
+            const container = document.getElementById('pendingTransactions');
+            try {
+                const pending = await api.getPendingTransactions();
+
+                if (!pending || pending.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 1rem;">No pending transfers</p>';
+                    return;
+                }
+
+                container.innerHTML = pending.map(txn => `
+                    <div style="background: #FFF8E1; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; border-left: 4px solid #FFC107; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <div>
+                            <strong>${txn.sender_account} → ${txn.receiver_account}</strong><br>
+                            <small>Amount: £${fmtGBP(txn.amount)}</small><br>
+                            <small>Ref: ${txn.reference}</small><br>
+                            ${txn.narration ? `<small>Note: ${txn.narration}</small><br>` : ''}
+                            <small>Date: ${new Date(txn.created_at).toLocaleString('en-GB')}</small>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="approveTransfer('${txn.reference}')" class="btn" style="background: #28A745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer;">✓ Approve</button>
+                            <button onclick="declineTransfer('${txn.reference}')" class="btn" style="background: #DC3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer;">✕ Decline</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load pending transfers:', error);
+                container.innerHTML = '<p style="color:#C62828; text-align:center; padding:1rem;">Failed to load pending transfers</p>';
+            }
+        }
+
+        async function loadAll() {
+            const tbody = document.getElementById('transactionsTable');
             try {
                 const transactions = await api.request('/admin/transactions');
-                const tbody = document.getElementById('transactionsTable');
+
+                if (!transactions || transactions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No transactions yet</td></tr>';
+                    return;
+                }
+
                 tbody.innerHTML = transactions.map(t => `
                     <tr>
-                        <td>${new Date(t.created_at).toLocaleString()}</td>
+                        <td>${new Date(t.created_at).toLocaleString('en-GB')}</td>
                         <td>${t.reference}</td>
                         <td>${t.sender_account}</td>
                         <td>${t.receiver_account}</td>
-                        <td>$${parseFloat(t.amount).toFixed(2)}</td>
+                        <td>£${fmtGBP(t.amount)}</td>
                         <td><span class="badge badge-${t.status}">${t.status}</span></td>
                     </tr>
                 `).join('');
             } catch (error) {
-                showToast('Failed to load transactions', 'error');
+                console.error('Failed to load transactions:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#C62828;">Failed to load transactions</td></tr>';
             }
-        });
+        }
+
+        async function approveTransfer(reference) {
+            if (!confirm('Approve this transfer? Funds will be moved immediately.')) return;
+            try {
+                await api.approveTransaction(reference);
+                showToast('✅ Transfer approved and completed', 'success');
+                await loadPending();
+                await loadAll();
+            } catch (error) {
+                showToast(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        async function declineTransfer(reference) {
+            const reason = prompt('Reason for declining this transfer:');
+            if (reason === null) return;
+            try {
+                await api.declineTransaction(reference, reason || 'Declined by admin');
+                showToast('✅ Transfer declined', 'success');
+                await loadPending();
+                await loadAll();
+            } catch (error) {
+                showToast(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
     </script>
 </body>
 </html>

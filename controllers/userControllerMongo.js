@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { Account, Transaction, User } = require('../database/mongodb');
 
 class UserController {
@@ -15,7 +16,21 @@ class UserController {
 
     async transfer(req, res) {
         try {
-            const { sender_account, receiver_account, amount, narration } = req.body;
+            const userId = req.user.id;
+            const { sender_account, receiver_account, narration, pin } = req.body;
+            const amount = parseFloat(req.body.amount);
+
+            if (!sender_account || !receiver_account) {
+                return res.status(400).json({ error: 'Sender and receiver account are required' });
+            }
+
+            if (isNaN(amount) || amount <= 0) {
+                return res.status(400).json({ error: 'Enter a valid amount greater than 0' });
+            }
+
+            if (sender_account === receiver_account) {
+                return res.status(400).json({ error: 'Cannot transfer to the same account' });
+            }
 
             // Validate accounts exist
             const senderAcc = await Account.findOne({ account_number: sender_account });
@@ -23,6 +38,29 @@ class UserController {
 
             if (!senderAcc || !receiverAcc) {
                 return res.status(404).json({ error: 'Account not found' });
+            }
+
+            // The sender account must belong to the logged-in user.
+            if (senderAcc.user_id.toString() !== userId) {
+                return res.status(403).json({ error: 'You can only transfer from your own account' });
+            }
+
+            // Enforce KYC verification server-side (the UI also gates this).
+            const sender = await User.findById(userId).select('kyc_status transaction_pin');
+            if (!sender || sender.kyc_status !== 'verified') {
+                return res.status(403).json({ error: 'Complete KYC verification before making transfers' });
+            }
+
+            // Require the user's transaction PIN to authorize the transfer.
+            if (!sender.transaction_pin) {
+                return res.status(400).json({ error: 'Set your transaction PIN in Settings before making transfers' });
+            }
+            if (!pin) {
+                return res.status(400).json({ error: 'Transaction PIN is required' });
+            }
+            const pinValid = await bcrypt.compare(String(pin), sender.transaction_pin);
+            if (!pinValid) {
+                return res.status(401).json({ error: 'Incorrect transaction PIN' });
             }
 
             if (senderAcc.available_balance < amount) {
@@ -66,25 +104,11 @@ class UserController {
             const id_document = req.files?.id_document?.[0];
             const selfie_photo = req.files?.selfie_photo?.[0];
 
-            if (!id_document && !selfie_photo) {
-                // Accept request without files (for backward compatibility)
-                // Just mark KYC as verified
-                const user = await User.findByIdAndUpdate(
-                    userId,
-                    { kyc_status: 'verified' },
-                    { new: true }
-                );
-
-                return res.json({
-                    message: 'KYC verification completed',
-                    kyc_status: user.kyc_status
-                });
-            }
-
-            // If files are provided, validate both are present
-            if ((id_document && !selfie_photo) || (!id_document && selfie_photo)) {
-                return res.status(400).json({ 
-                    error: 'Both ID document and selfie photo are required' 
+            // Both documents are required. There is no auto-verify path — an admin
+            // reviews the uploaded documents and approves/rejects the customer.
+            if (!id_document || !selfie_photo) {
+                return res.status(400).json({
+                    error: 'Both ID document and selfie photo are required'
                 });
             }
 
@@ -166,23 +190,65 @@ class UserController {
     async getUserProfile(req, res) {
         try {
             const userId = req.user.id;
-            const user = await User.findById(userId).select('-password');
+            const user = await User.findById(userId).select('-password_hash');
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
 
+            const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+
             res.json({
                 id: user._id,
                 email: user.email,
-                full_name: user.full_name,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                full_name: fullName || user.email,
+                account_number: user.account_number,
                 kyc_status: user.kyc_status || 'pending',
                 account_status: user.account_status || 'active',
-                registration_status: user.registration_status || 'completed'
+                registration_status: user.registration_status || 'completed',
+                has_transaction_pin: !!user.transaction_pin
             });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Failed to fetch user profile' });
+        }
+    }
+
+    async setTransactionPin(req, res) {
+        try {
+            const userId = req.user.id;
+            const { current_pin, pin } = req.body;
+
+            // PIN must be exactly 4 digits.
+            if (!/^\d{4}$/.test(String(pin || ''))) {
+                return res.status(400).json({ error: 'PIN must be exactly 4 digits' });
+            }
+
+            const user = await User.findById(userId).select('transaction_pin');
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            // If a PIN already exists, the current one must be supplied and correct.
+            if (user.transaction_pin) {
+                if (!current_pin) {
+                    return res.status(400).json({ error: 'Enter your current PIN to change it' });
+                }
+                const ok = await bcrypt.compare(String(current_pin), user.transaction_pin);
+                if (!ok) {
+                    return res.status(401).json({ error: 'Current PIN is incorrect' });
+                }
+            }
+
+            user.transaction_pin = await bcrypt.hash(String(pin), 10);
+            await user.save();
+
+            res.json({ message: 'Transaction PIN saved successfully', has_transaction_pin: true });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to save transaction PIN' });
         }
     }
 }

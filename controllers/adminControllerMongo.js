@@ -1,4 +1,4 @@
-const { User, Account, Transaction, BalanceAdjustment, Admin } = require('../database/mongodb');
+const { User, Account, Transaction, BalanceAdjustment, Admin, AuditLog } = require('../database/mongodb');
 
 class AdminController {
     async getCustomers(req, res) {
@@ -140,6 +140,27 @@ class AdminController {
         }
     }
 
+    async getAuditLogs(req, res) {
+        try {
+            const logs = await AuditLog.find({}).sort({ created_at: -1 }).limit(100);
+
+            // Shape the records for the admin UI, which expects `timestamp`.
+            const formatted = logs.map(log => ({
+                action: log.action,
+                timestamp: log.created_at,
+                ip_address: log.ip_address || null,
+                user_email: null,
+                admin_username: null,
+                details: log.user_agent || null
+            }));
+
+            res.json(formatted);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to fetch audit logs' });
+        }
+    }
+
     async getPendingTransactions(req, res) {
         try {
             const pending = await Transaction.find({ status: 'pending' }).sort({ created_at: -1 });
@@ -169,6 +190,12 @@ class AdminController {
 
             if (!senderAcc || !receiverAcc) {
                 return res.status(404).json({ error: 'Account not found' });
+            }
+
+            // Re-check funds at approval time — the sender may have queued several
+            // pending transfers, or had their balance adjusted since submitting.
+            if (senderAcc.available_balance < transaction.amount) {
+                return res.status(400).json({ error: 'Sender has insufficient balance to complete this transfer' });
             }
 
             // Perform transfer

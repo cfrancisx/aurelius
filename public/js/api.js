@@ -77,15 +77,16 @@ class API {
 
     // User endpoints
     async getProfile() {
-        return this.request('/user/profile');
+        return this.request('/user-profile');
     }
 
     async getAccounts() {
-        return this.request('/user/accounts');
+        return this.request('/accounts');
     }
 
     async getTransactions(accountNumber) {
-        return this.request(`/user/transactions/${accountNumber}`);
+        const query = accountNumber ? `?account_number=${encodeURIComponent(accountNumber)}` : '';
+        return this.request(`/transactions${query}`);
     }
 
     async transfer(data) {
@@ -147,13 +148,6 @@ class API {
 
     async getBalanceStats() {
         return this.request('/admin/balance/stats');
-    }
-
-    async uploadKYC() {
-        return this.request('/kyc/upload', {
-            method: 'POST',
-            body: JSON.stringify({ document: 'uploaded' })
-        });
     }
 
     async getPendingTransactions() {

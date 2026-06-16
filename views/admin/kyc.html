@@ -67,8 +67,11 @@
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const customers = await api.getCustomers();
-                // Show anyone awaiting review (pending) so the admin can view their documents.
-                const pendingKYC = customers.filter(c => c.kyc_status === 'pending');
+                // Only show customers who have actually uploaded documents and are
+                // awaiting review — not brand-new accounts that default to 'pending'.
+                const pendingKYC = customers.filter(c =>
+                    c.kyc_status === 'pending' && c.kyc_documents && c.kyc_documents.uploaded_at
+                );
                 const tbody = document.getElementById('kycTable');
 
                 if (pendingKYC.length === 0) {

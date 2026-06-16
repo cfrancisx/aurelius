@@ -40,48 +40,98 @@
     
     <script src="/js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const accounts = await api.getAccounts();
-            const container = document.getElementById('accountsContainer');
-            
-            container.innerHTML = accounts.map(account => `
-                <div class="account-card" onclick="showAccountDetails('${account.account_number}')">
-                    <div class="account-type">${account.currency} Account</div>
-                    <div class="account-number">${account.account_number}</div>
-                    <div class="balance">$${account.available_balance.toLocaleString()}</div>
-                    <div class="balance-label">Available Balance</div>
-                    <div class="ledger-balance">Ledger: $${account.ledger_balance.toLocaleString()}</div>
-                </div>
-            `).join('');
+        let accountsCache = [];
+
+        const fmtGBP = (n) => Number(n || 0).toLocaleString('en-GB', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
-        
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const container = document.getElementById('accountsContainer');
+            try {
+                accountsCache = await api.getAccounts();
+
+                if (!Array.isArray(accountsCache) || accountsCache.length === 0) {
+                    container.innerHTML = '<p style="color:#999;">No accounts found for your profile.</p>';
+                    document.getElementById('selectedAccountDetails').innerHTML =
+                        '<p style="color:#999;">No account details to display.</p>';
+                    return;
+                }
+
+                container.innerHTML = accountsCache.map(account => `
+                    <div class="account-card" onclick="showAccountDetails('${account.account_number}')" style="cursor:pointer;">
+                        <div class="account-type">${account.currency || 'GBP'} Account</div>
+                        <div class="account-number">${account.account_number}</div>
+                        <div class="balance">£${fmtGBP(account.available_balance)}</div>
+                        <div class="balance-label">Available Balance</div>
+                        <div class="ledger-balance">Ledger: £${fmtGBP(account.ledger_balance)}</div>
+                    </div>
+                `).join('');
+
+                // Show the first account's details by default.
+                showAccountDetails(accountsCache[0].account_number);
+            } catch (error) {
+                console.error('Failed to load accounts:', error);
+                container.innerHTML = '<p style="color:#C62828;">Failed to load your accounts. Please refresh the page.</p>';
+            }
+        });
+
         async function showAccountDetails(accountNumber) {
-            const transactions = await api.getTransactions(accountNumber);
             const container = document.getElementById('selectedAccountDetails');
-            
-            container.innerHTML = `
-                <h4>Transaction History for ${accountNumber}</h4>
-                <div class="transaction-table">
-                    <table>
-                        <thead>
-                            <tr><th>Date</th><th>Reference</th><th>Narration</th><th>Amount</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            ${transactions.map(t => `
-                                <tr>
-                                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
-                                    <td>${t.reference}</td>
-                                    <td>${t.narration || '-'}</td>
-                                    <td class="${t.sender_account === accountNumber ? 'text-danger' : 'text-success'}">
-                                        ${t.sender_account === accountNumber ? '-' : '+'}£${t.amount.toLocaleString()}
-                                    </td>
-                                    <td><span class="badge badge-${t.status}">${t.status}</span></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+            const account = accountsCache.find(a => a.account_number === accountNumber);
+
+            const infoHTML = account ? `
+                <div class="grid grid-2" style="margin-bottom:1.5rem;">
+                    <div><strong>Account Number</strong><div>${account.account_number}</div></div>
+                    <div><strong>Currency</strong><div>${account.currency || 'GBP'}</div></div>
+                    <div><strong>Available Balance</strong><div>£${fmtGBP(account.available_balance)}</div></div>
+                    <div><strong>Ledger Balance</strong><div>£${fmtGBP(account.ledger_balance)}</div></div>
+                    <div><strong>Status</strong><div><span class="badge badge-${account.status}">${account.status || 'active'}</span></div></div>
                 </div>
-            `;
+            ` : '';
+
+            container.innerHTML = infoHTML + '<h4>Transaction History</h4><p style="color:#999;">Loading transactions...</p>';
+
+            try {
+                const transactions = await api.getTransactions(accountNumber);
+
+                const rows = (transactions && transactions.length)
+                    ? transactions.map(t => `
+                        <tr>
+                            <td>${new Date(t.created_at).toLocaleDateString('en-GB')}</td>
+                            <td>${t.reference}</td>
+                            <td>${t.narration || '-'}</td>
+                            <td class="${t.sender_account === accountNumber ? 'text-danger' : 'text-success'}">
+                                ${t.sender_account === accountNumber ? '-' : '+'}£${fmtGBP(t.amount)}
+                            </td>
+                            <td><span class="badge badge-${t.status}">${t.status}</span></td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="5" style="text-align:center; color:#999;">No transactions yet</td></tr>';
+
+                container.innerHTML = infoHTML + `
+                    <h4>Transaction History for ${accountNumber}</h4>
+                    <div class="transaction-table">
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Reference</th><th>Narration</th><th>Amount</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load transactions:', error);
+                container.innerHTML = infoHTML +
+                    '<h4>Transaction History</h4><p style="color:#C62828;">Failed to load transactions.</p>';
+            }
         }
     </script>
 </body>

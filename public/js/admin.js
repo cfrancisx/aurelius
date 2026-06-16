@@ -83,10 +83,14 @@ async function declineTxn(reference) {
 }
 
 function updateStats(stats) {
-    document.getElementById('totalCustomers').textContent = stats.total_customers;
-    document.getElementById('totalTransactions').textContent = stats.total_transactions;
-    document.getElementById('totalVolume').textContent = `£${formatNumber(stats.total_volume)}`;
-    document.getElementById('pendingKYC').textContent = stats.pending_kyc;
+    const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    };
+    set('totalCustomers', stats.total_customers);
+    set('totalTransactions', stats.total_transactions);
+    set('totalVolume', `£${formatNumber(stats.total_volume)}`);
+    set('pendingKYC', stats.pending_kyc);
 }
 
 function updateCustomersTable(customers) {
@@ -110,13 +114,17 @@ function updateCustomersTable(customers) {
 
 function updateBalanceStats(stats) {
     if (!stats.stats) return;
-    
-    document.getElementById('totalAdjustments').textContent = stats.stats.total || 0;
-    document.getElementById('totalCredits').textContent = stats.stats.credits || 0;
-    document.getElementById('totalDebits').textContent = stats.stats.debits || 0;
-    document.getElementById('creditAmount').textContent = `£${formatNumber(stats.stats.credit_amount || 0)}`;
-    document.getElementById('debitAmount').textContent = `£${formatNumber(stats.stats.debit_amount || 0)}`;
-    
+
+    const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    };
+    set('totalAdjustments', stats.stats.total || 0);
+    set('totalCredits', stats.stats.credits || 0);
+    set('totalDebits', stats.stats.debits || 0);
+    set('creditAmount', `£${formatNumber(stats.stats.credit_amount || 0)}`);
+    set('debitAmount', `£${formatNumber(stats.stats.debit_amount || 0)}`);
+
     const recentContainer = document.getElementById('recentAdjustments');
     if (recentContainer && stats.recent) {
         recentContainer.innerHTML = stats.recent.map(adjustment => `
