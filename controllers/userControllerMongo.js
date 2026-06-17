@@ -17,7 +17,7 @@ class UserController {
     async transfer(req, res) {
         try {
             const userId = req.user.id;
-            const { sender_account, receiver_account, narration, pin } = req.body;
+            const { sender_account, receiver_account, routing_number, narration, pin } = req.body;
             const amount = parseFloat(req.body.amount);
 
             if (!sender_account || !receiver_account) {
@@ -32,11 +32,12 @@ class UserController {
                 return res.status(400).json({ error: 'Cannot transfer to the same account' });
             }
 
-            // Validate accounts exist
+            // The sender account must exist and belong to this user. The receiver
+            // can be any account number (external/other bank) — the admin reviews
+            // and approves or declines the transfer.
             const senderAcc = await Account.findOne({ account_number: sender_account });
-            const receiverAcc = await Account.findOne({ account_number: receiver_account });
 
-            if (!senderAcc || !receiverAcc) {
+            if (!senderAcc) {
                 return res.status(404).json({ error: 'Account not found' });
             }
 
@@ -72,6 +73,7 @@ class UserController {
             const transaction = await Transaction.create({
                 sender_account,
                 receiver_account,
+                routing_number,
                 amount,
                 transaction_type: 'transfer',
                 reference,
@@ -85,6 +87,7 @@ class UserController {
                 transaction: {
                     sender_account,
                     receiver_account,
+                    routing_number,
                     amount,
                     status: 'pending',
                     reference

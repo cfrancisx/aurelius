@@ -3,27 +3,27 @@ const { User, Admin, Account, Transaction } = require('./mongodb');
 
 async function seedMongoDB() {
     try {
-        // Clear existing data
-        await Admin.deleteMany({});
-        await User.deleteMany({});
-        await Account.deleteMany({});
-        await Transaction.deleteMany({});
-        
-        console.log('✅ Collections cleared');
-        
-        // Create admin
+        // IMPORTANT: never wipe existing data on startup. The server can restart at
+        // any time (e.g. Render free-tier spin-down), and clearing collections would
+        // delete real registered users and their accounts — leaving them with a valid
+        // JWT but no account, which surfaces as "Error loading accounts" in the UI.
+        // Seeding is idempotent: each record is only created when it does not exist.
+
+        // Create admin (only if missing)
         const adminEmail = process.env.ADMIN_EMAIL || 'aureliusadmin@gmail.com';
         const adminPassword = process.env.ADMIN_PASSWORD || 'Admin12345';
-        const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
-        
-        const admin = await Admin.create({
-            username: 'superadmin',
-            email: adminEmail,
-            password_hash: hashedAdminPassword,
-            role: 'superadmin'
-        });
-        
-        console.log(`✅ Admin user created: ${adminEmail}`);
+
+        const existingAdmin = await Admin.findOne({ email: adminEmail });
+        if (!existingAdmin) {
+            const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+            await Admin.create({
+                username: 'superadmin',
+                email: adminEmail,
+                password_hash: hashedAdminPassword,
+                role: 'superadmin'
+            });
+            console.log(`✅ Admin user created: ${adminEmail}`);
+        }
         
         // Create sample users with accounts
         const sampleUsers = [
@@ -146,9 +146,11 @@ async function seedMongoDB() {
             }
         }
         
-        // Create sample transactions
+        // Create sample transactions only once (when none exist yet), so restarts
+        // don't keep appending demo transactions to a live database.
         const users = await User.find({});
-        if (users.length >= 2) {
+        const existingTxnCount = await Transaction.countDocuments();
+        if (users.length >= 2 && existingTxnCount === 0) {
             for (let i = 0; i < 7; i++) {
                 const senderIdx = Math.floor(Math.random() * users.length);
                 const receiverIdx = Math.floor(Math.random() * users.length);

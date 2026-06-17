@@ -89,6 +89,7 @@
                     <div style="background: #FFF8E1; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; border-left: 4px solid #FFC107; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
                         <div>
                             <strong>${txn.sender_account} → ${txn.receiver_account}</strong><br>
+                            ${txn.routing_number ? `<small>Routing: ${txn.routing_number}</small><br>` : ''}
                             <small>Amount: £${fmtGBP(txn.amount)}</small><br>
                             <small>Ref: ${txn.reference}</small><br>
                             ${txn.narration ? `<small>Note: ${txn.narration}</small><br>` : ''}

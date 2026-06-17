@@ -184,12 +184,14 @@ class AdminController {
                 return res.status(400).json({ error: 'Transaction is not pending' });
             }
 
-            // Get accounts
+            // Get accounts. The sender must be an internal account; the receiver
+            // may be external (any account number), in which case we only debit the
+            // sender and the funds leave the bank.
             const senderAcc = await Account.findOne({ account_number: transaction.sender_account });
             const receiverAcc = await Account.findOne({ account_number: transaction.receiver_account });
 
-            if (!senderAcc || !receiverAcc) {
-                return res.status(404).json({ error: 'Account not found' });
+            if (!senderAcc) {
+                return res.status(404).json({ error: 'Sender account not found' });
             }
 
             // Re-check funds at approval time — the sender may have queued several
@@ -198,14 +200,17 @@ class AdminController {
                 return res.status(400).json({ error: 'Sender has insufficient balance to complete this transfer' });
             }
 
-            // Perform transfer
+            // Perform transfer: always debit the sender; credit the receiver only
+            // when it is an internal account.
             senderAcc.available_balance -= transaction.amount;
             senderAcc.ledger_balance -= transaction.amount;
-            receiverAcc.available_balance += transaction.amount;
-            receiverAcc.ledger_balance += transaction.amount;
-
             await senderAcc.save();
-            await receiverAcc.save();
+
+            if (receiverAcc) {
+                receiverAcc.available_balance += transaction.amount;
+                receiverAcc.ledger_balance += transaction.amount;
+                await receiverAcc.save();
+            }
 
             // Update transaction status
             transaction.status = 'completed';

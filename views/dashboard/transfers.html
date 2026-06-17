@@ -133,10 +133,16 @@
                     
                     <div class="form-group">
                         <label for="receiverAccount">To Account Number</label>
-                        <input type="text" id="receiverAccount" class="form-control" placeholder="e.g., AUB123456789" required>
-                        <small style="color: #666;">Enter the recipient's account number</small>
+                        <input type="text" id="receiverAccount" class="form-control" placeholder="e.g., 1234567890" required>
+                        <small style="color: #666;">Enter the recipient's account number (any bank)</small>
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label for="routingNumber">Routing Number</label>
+                        <input type="text" id="routingNumber" class="form-control" inputmode="numeric" placeholder="e.g., 026009593" required>
+                        <small style="color: #666;">Enter the recipient bank's routing number</small>
+                    </div>
+
                     <div class="form-group">
                         <label for="amount">Amount (£)</label>
                         <input type="number" id="amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
@@ -310,6 +316,7 @@
 
             const fromAccount = document.getElementById('fromAccount').value;
             const receiverAccount = document.getElementById('receiverAccount').value.trim();
+            const routingNumber = document.getElementById('routingNumber').value.trim();
             const amount = parseFloat(document.getElementById('amount').value);
             const narration = document.getElementById('narration').value.trim();
             const pin = document.getElementById('txnPin').value.trim();
@@ -322,6 +329,11 @@
 
             if (!receiverAccount) {
                 showAlert('Please enter the recipient account number.', 'error');
+                return;
+            }
+
+            if (!routingNumber) {
+                showAlert('Please enter the recipient bank routing number.', 'error');
                 return;
             }
 
@@ -362,6 +374,7 @@
                     body: JSON.stringify({
                         sender_account: fromAccount,
                         receiver_account: receiverAccount,
+                        routing_number: routingNumber,
                         amount,
                         narration,
                         pin

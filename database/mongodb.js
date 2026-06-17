@@ -69,6 +69,7 @@ const accountSchema = new mongoose.Schema({
 const transactionSchema = new mongoose.Schema({
     sender_account: { type: String, required: true },
     receiver_account: { type: String, required: true },
+    routing_number: String,
     amount: { type: Number, required: true },
     transaction_type: { type: String, required: true },
     reference: { type: String, unique: true, required: true },
