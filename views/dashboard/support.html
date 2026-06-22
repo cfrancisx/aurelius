@@ -182,33 +182,30 @@
 
     <script>
         function handleContactForm(event) {
-            event.preventDefault();
-            alert('Thank you for your message. We will get back to you shortly!');
-            event.target.reset();
-        }
-        const templateParams = {
+    event.preventDefault();
+
+    const templateParams = {
         from_name: document.getElementById('name').value,
         from_email: document.getElementById('email').value,
         subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value,
-
-        // Optional if using dynamic recipient
-        to_email: "aureliusa536@gmail.com"
+        message: document.getElementById('message').value
     };
 
     emailjs.send(
-        "service_jx96chb",
-        "template_lxauisd",
+        'service_jx96chb',
+        'template_lxauisd',
         templateParams
     )
     .then(function(response) {
-        alert("Message sent successfully!");
-        document.getElementById("contactForm").reset();
+        console.log('SUCCESS!', response);
+        alert('Message sent successfully!');
+        event.target.reset();
     })
     .catch(function(error) {
-        alert("Failed to send message.");
-        console.error(error);
+        console.error('FAILED...', error);
+        alert('Failed to send message.');
     });
+}
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
