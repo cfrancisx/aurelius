@@ -74,12 +74,25 @@
                         <input type="hidden" id="statusCustomerId">
                         <div class="form-group">
                             <label>Status</label>
-                            <select id="newStatus" class="form-control" required>
-                                <option value="active">Active</option>
-                                <option value="suspended">Suspended</option>
-                                <option value="frozen">Frozen</option>
-                                <option value="closed">Closed</option>
-                            </select>
+                           <div class="status-buttons">
+    <button type="button" onclick="setStatus('active')" class="btn btn-success">
+        Activate
+    </button>
+
+    <button type="button" onclick="setStatus('suspended')" class="btn btn-warning">
+        Suspend
+    </button>
+
+    <button type="button" onclick="setStatus('frozen')" class="btn btn-info">
+        Freeze
+    </button>
+
+    <button type="button" onclick="setStatus('closed')" class="btn btn-danger">
+        Close
+    </button>
+</div>
+
+<input type="hidden" id="newStatus">
                         </div>
                         <div class="form-group">
                             <label>Reason</label>
@@ -244,6 +257,10 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
+        }
+
+        function setStatus(status) {
+    document.getElementById('newStatus').value = status;
         }
     </script>
 </body>

@@ -38,9 +38,23 @@ class UserModel {
         await this.db.run('UPDATE users SET kyc_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, userId]);
     }
     
-    async updateStatus(userId, status) {
-        await this.db.run('UPDATE users SET account_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, userId]);
+   async updateStatus(userId, status) {
+    const validStatuses = [
+        'active',
+        'suspended',
+        'frozen',
+        'closed'
+    ];
+
+    if (!validStatuses.includes(status)) {
+        throw new Error('Invalid account status');
     }
+
+    await this.db.run(
+        'UPDATE users SET account_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [status, userId]
+    );
+}
     
     async getAll(limit = 100, offset = 0) {
         return await this.db.all(

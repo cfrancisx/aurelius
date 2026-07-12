@@ -1,3 +1,4 @@
+const UserModel = require('../models/User');
 const AccountModel = require('../models/Account');
 const TransactionModel = require('../models/Transaction');
 const AuditLogModel = require('../models/AuditLog');
@@ -9,10 +10,18 @@ class UserController {
         this.accountModel = new AccountModel(db);
         this.transactionModel = new TransactionModel(db);
         this.auditLog = new AuditLogModel(db);
+        this.userModel = new UserModel(db);
     }
 
     async getProfile(req, res) {
         try {
+            const user = await this.userModel.findById(req.user.id);
+
+        if (user.account_status === 'closed') {
+        return res.status(403).json({
+        error: 'Account closed.'
+    });
+}
             const user = await this.db.get(
                 'SELECT id, account_number, first_name, last_name, email, phone, address, date_of_birth, account_type, account_status, kyc_status, created_at FROM users WHERE id = ?',
                 [req.user.id]
@@ -60,11 +69,37 @@ class UserController {
     }
 
     async transferFunds(req, res) {
-        try {
-            const { receiver_account, amount, narration } = req.body;
-            
-            // Get sender's account
-            const senderAccounts = await this.accountModel.getUserAccounts(req.user.id);
+    try {
+        const { receiver_account, amount, narration } = req.body;
+
+        const user = await this.userModel.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found'
+            });
+        }
+
+        if (user.account_status === 'suspended') {
+            return res.status(403).json({
+                error: 'Account suspended. Transfers are disabled.'
+            });
+        }
+
+        if (user.account_status === 'frozen') {
+            return res.status(403).json({
+                error: 'Account frozen. Transfers are disabled.'
+            });
+        }
+
+        if (user.account_status === 'closed') {
+            return res.status(403).json({
+                error: 'Account closed.'
+            });
+        }
+
+        // Get sender's account
+        const senderAccounts = await this.accountModel.getUserAccounts(req.user.id);
             const senderAccount = senderAccounts[0];
             
             if (!senderAccount) {

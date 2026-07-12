@@ -50,9 +50,17 @@ class AuthController {
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
             
-            if (user.account_status !== 'active') {
-                return res.status(403).json({ error: 'Account is not active' });
-            }
+           if (user.account_status === 'suspended') {
+    return res.status(403).json({
+        error: 'Account suspended. Contact support.'
+    });
+}
+
+            if (user.account_status === 'closed') {
+    return res.status(403).json({
+        error: 'Account closed.'
+    });
+}
             
             await this.auditLog.log('user_login', user.id, null, req.ip, req.headers['user-agent']);
             
