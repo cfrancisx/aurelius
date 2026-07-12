@@ -86,6 +86,45 @@ class AdminController {
         }
     }
 
+    async updateCustomerStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status, reason } = req.body;
+            const allowed = ['active', 'suspended', 'frozen', 'closed'];
+
+            if (!allowed.includes(status)) {
+                return res.status(400).json({ error: 'Invalid account status' });
+            }
+
+            const user = await User.findByIdAndUpdate(
+                id,
+                { account_status: status, updated_at: new Date() },
+                { new: true }
+            ).select('first_name last_name account_status');
+
+            if (!user) {
+                return res.status(404).json({ error: 'Customer not found' });
+            }
+
+            await AuditLog.create({
+                action: `account_status_changed_to_${status}`,
+                user_id: id,
+                admin_id: req.user?.id || null,
+                ip_address: req.ip,
+                user_agent: req.headers['user-agent']
+            });
+
+            res.json({
+                success: true,
+                message: `Account ${status} successfully`,
+                account_status: user.account_status
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to update account status' });
+        }
+    }
+
     async getTransactions(req, res) {
         try {
             const transactions = await Transaction.find({}).sort({ created_at: -1 }).limit(100);

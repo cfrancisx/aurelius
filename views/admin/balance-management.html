@@ -29,7 +29,8 @@
         }
 
         .action-button {
-            background: white;
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            color: white;
             padding: 1.5rem;
             border-radius: 0.75rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -41,18 +42,21 @@
 
         .action-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
         }
 
         .action-button.credit {
+            background: linear-gradient(135deg, #00AA62 0%, #0D8B4A 100%);
             border-top: 4px solid #00AA62;
         }
 
         .action-button.debit {
+            background: linear-gradient(135deg, #FF6B35 0%, #E85A1E 100%);
             border-top: 4px solid #FF6B35;
         }
 
         .action-button.set {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
             border-top: 4px solid #7C3AED;
         }
 
@@ -64,13 +68,13 @@
 
         .action-label {
             font-weight: 600;
-            color: var(--text-primary);
+            color: white;
             margin-bottom: 0.25rem;
         }
 
         .action-desc {
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .stats-grid {
@@ -197,17 +201,17 @@
             <div class="action-buttons-group">
                 <button onclick="showCreditModal()" class="action-button credit">
                     <span class="action-icon">➕</span>
-                    <div class="action-label">Credit Account</div>
+                    <div class="action-label">Proceed</div>
                     <div class="action-desc">Add funds to account</div>
                 </button>
                 <button onclick="showDebitModal()" class="action-button debit">
                     <span class="action-icon">➖</span>
-                    <div class="action-label">Debit Account</div>
+                    <div class="action-label">Proceed</div>
                     <div class="action-desc">Remove funds from account</div>
                 </button>
                 <button onclick="showSetBalanceModal()" class="action-button set">
                     <span class="action-icon">⚙️</span>
-                    <div class="action-label">Set Balance</div>
+                    <div class="action-label">Proceed</div>
                     <div class="action-desc">Set exact balance amount</div>
                 </button>
             </div>

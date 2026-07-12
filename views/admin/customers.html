@@ -205,18 +205,29 @@
             const id = document.getElementById('statusCustomerId').value;
             const status = document.getElementById('newStatus').value;
             const reason = document.getElementById('statusReason').value;
-            
-            await fetch(`/api/admin/customers/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ status, reason })
-            });
-            
-            closeModal();
-            loadCustomers();
+
+            try {
+                const response = await fetch(`/api/admin/customers/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ status, reason })
+                });
+
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to update account status');
+                }
+
+                closeModal();
+                await loadCustomers();
+                alert('Account status updated successfully');
+            } catch (error) {
+                console.error('Failed to update account status:', error);
+                alert(error.message || 'Failed to update account status');
+            }
         });
         
         function manageBalance(customerId) {
