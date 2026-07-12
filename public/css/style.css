@@ -138,7 +138,7 @@ a:hover {
 
 .btn-primary {
     background: var(--primary);
-    color: white;
+    color: rgb(0, 87, 168);
 }
 
 .btn-primary:hover {
@@ -148,7 +148,7 @@ a:hover {
 
 .btn-secondary {
     background: var(--secondary);
-    color: white;
+    color: rgb(0, 87, 168);
 }
 
 .btn-secondary:hover {

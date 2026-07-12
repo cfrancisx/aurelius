@@ -139,9 +139,9 @@
                     <td><span class="badge badge-${customer.account_status}">${customer.account_status}</span></td>
                     <td><span class="badge badge-${customer.kyc_status}">${customer.kyc_status}</span></td>
                     <td>
-                                <button onclick="viewCustomer('${customer._id || customer.id}')" class="btn-sm">View</button>
-                                <button onclick="manageStatus('${customer._id || customer.id}', '${customer.account_status}')" class="btn btn-primary btn-sm">Proceed</button>
-                                <button onclick="manageBalance('${customer._id || customer.id}')" class="btn-sm">Balance</button>
+                        <button onclick="viewCustomer('${customer._id || customer.id}')" class="btn-sm">View</button>
+                        <button onclick="manageStatus('${customer._id || customer.id}', '${customer.account_status}')" class="btn-sm">Status</button>
+                        <button onclick="manageBalance('${customer._id || customer.id}')" class="btn-sm">Balance</button>
                      </td>
                 </tr>
             `).join('');
