@@ -38,11 +38,13 @@ module.exports = function() {
 
     // Admin operations
     router.get('/customers', (req, res) => adminController.getCustomers(req, res));
+    router.get('/customers/:id', (req, res) => adminController.getCustomerDetails(req, res));
 
     // KYC review
     router.get('/customers/:id/kyc-documents', (req, res) => adminController.getKYCDocuments(req, res));
     router.put('/customers/:id/kyc', (req, res) => adminController.updateKYCStatus(req, res));
     router.put('/customers/:id/status', (req, res) => adminController.updateCustomerStatus(req, res));
+    router.post('/customers/:id/status', (req, res) => adminController.updateCustomerStatus(req, res));
 
     router.get('/transactions', (req, res) => adminController.getTransactions(req, res));
     router.get('/audit-logs', (req, res) => adminController.getAuditLogs(req, res));

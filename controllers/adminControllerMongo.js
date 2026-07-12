@@ -61,6 +61,38 @@ class AdminController {
         }
     }
 
+    async getCustomerDetails(req, res) {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findById(id)
+                .select('-password_hash -kyc_documents.id_document_data -kyc_documents.selfie_photo_data');
+
+            if (!user) {
+                return res.status(404).json({ error: 'Customer not found' });
+            }
+
+            const accounts = await Account.find({ user_id: user._id });
+            const accountNumbers = accounts.map(a => a.account_number);
+
+            const transactions = await Transaction.find({
+                $or: [
+                    { sender_account: { $in: accountNumbers } },
+                    { receiver_account: { $in: accountNumbers } }
+                ]
+            }).sort({ created_at: -1 }).limit(20);
+
+            res.json({
+                customer: user.toObject(),
+                accounts,
+                transactions
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to fetch customer details' });
+        }
+    }
+
     async updateKYCStatus(req, res) {
         try {
             const { status } = req.body;
@@ -89,16 +121,21 @@ class AdminController {
     async updateCustomerStatus(req, res) {
         try {
             const { id } = req.params;
-            const { status, reason } = req.body;
+            const incomingStatus = req.body.status || req.body.account_status || req.body.newStatus || null;
+            const reason = req.body.reason || req.body.reasonText || '';
             const allowed = ['active', 'suspended', 'frozen', 'closed'];
 
-            if (!allowed.includes(status)) {
+            if (!incomingStatus) {
+                return res.status(400).json({ error: 'No status provided' });
+            }
+
+            if (!allowed.includes(incomingStatus)) {
                 return res.status(400).json({ error: 'Invalid account status' });
             }
 
             const user = await User.findByIdAndUpdate(
                 id,
-                { account_status: status, updated_at: new Date() },
+                { account_status: incomingStatus, updated_at: new Date() },
                 { new: true }
             ).select('first_name last_name account_status');
 
@@ -107,16 +144,17 @@ class AdminController {
             }
 
             await AuditLog.create({
-                action: `account_status_changed_to_${status}`,
+                action: `account_status_changed_to_${incomingStatus}`,
                 user_id: id,
                 admin_id: req.user?.id || null,
                 ip_address: req.ip,
-                user_agent: req.headers['user-agent']
+                user_agent: req.headers['user-agent'],
+                details: reason
             });
 
             res.json({
                 success: true,
-                message: `Account ${status} successfully`,
+                message: `Account ${incomingStatus} successfully`,
                 account_status: user.account_status
             });
         } catch (error) {
