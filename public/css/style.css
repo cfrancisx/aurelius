@@ -134,6 +134,8 @@ a:hover {
     display: inline-block;
     text-align: center;
     text-decoration: none;
+    color: rgb(0, 87, 168);
+}
 }
 
 .btn-primary {
