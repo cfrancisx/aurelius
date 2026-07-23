@@ -75,6 +75,18 @@
         #convo-input { flex: 1; border: none; padding: 12px; font-size: 14px; }
         #convo-input:focus { outline: none; }
         #convo-send { border: none; background: #0b3d2e; color: white; padding: 0 20px; cursor: pointer; }
+      
+        @media (max-width: 768px) {
+        #rep-dashboard {
+        flex-direction: column;
+        height: auto;
+    }
+
+        #convo-list {
+        width: 100%;
+        max-height: 200px;
+    }
+}
     </style>
 
     <script src="/js/api.js"></script>

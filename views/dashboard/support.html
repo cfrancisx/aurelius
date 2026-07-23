@@ -201,22 +201,36 @@
 
         #aurelius-chat-bubble {
             position: fixed;
-    right: 24px;
-    bottom: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #0b3d2e;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    z-index: 2147483647;
-    border: 3px solid #fff;
+            right: 24px;
+            bottom: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #0b3d2e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 2147483647;
+            border: 3px solid #fff;
         }
+
+        @media (max-width: 480px) {
+    #aurelius-chat-window {
+        width: calc(100vw - 32px);
+        right: 16px;
+        height: 70vh;
+        bottom: 84px;
+    }
+
+    #aurelius-chat-bubble {
+        right: 16px;
+        bottom: 16px;
+    }
+}
 
         #aurelius-chat-window {
             position: fixed;

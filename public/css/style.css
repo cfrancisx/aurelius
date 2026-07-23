@@ -562,3 +562,27 @@ tr:hover {
 .p-1 { padding: var(--spacing-sm); }
 .p-2 { padding: var(--spacing-md); }
 .p-3 { padding: var(--spacing-lg); }
+/* Global responsive base */
+* {
+    box-sizing: border-box;
+}
+
+img, video {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.4rem; }
+
+    /* Any inline two-column grids collapse to one column */
+    [style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+}

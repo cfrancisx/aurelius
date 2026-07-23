@@ -655,3 +655,38 @@
 .align-center {
     align-items: center;
 }
+@media (max-width: 900px) {
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .admin-main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .admin-nav a {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 0.6rem 1rem;
+    }
+
+    .admin-nav a.active {
+        border-left: none;
+        border-bottom-color: white;
+    }
+
+    .stats-grid,
+    .action-buttons-group,
+    .charts-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
