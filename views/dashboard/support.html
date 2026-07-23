@@ -79,8 +79,7 @@
                 </div>
             </section>
 
-            <!-- Chat bubble -->
-            <div id="aurelius-chat-bubble">💬</div>
+            
 
             <!-- Chat window -->
             <div id="aurelius-chat-window" class="hidden">
@@ -199,20 +198,21 @@
 
         #aurelius-chat-bubble {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #0b3d2e;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 9999;
+    right: 24px;
+    bottom: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #0b3d2e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 2147483647;
+    border: 3px solid #fff;
         }
 
         #aurelius-chat-window {
@@ -398,5 +398,7 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/dashboard.js"></script>
+    <!-- Chat bubble -->
+            <div id="aurelius-chat-bubble">💬</div>
 </body>
 </html>
