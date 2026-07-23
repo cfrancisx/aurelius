@@ -3,17 +3,15 @@ const bcrypt = require('bcryptjs');
 
 // MongoDB Connection
 async function connectDatabase() {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://aurelius_admin:Admin12345@cluster0.3mottii.mongodb.net/?appName=Cluster0';
+    const mongoUri = process.env.MONGODB_URI;
+
+    if (!mongoUri) {
+        console.error('❌ MONGODB_URI environment variable is not set!');
+        process.exit(1);
+    }
     
     try {
         await mongoose.connect(mongoUri);
-        console.log('✅ MongoDB connected successfully');
-        return mongoose.connection;
-    } catch (error) {
-        console.error('❌ MongoDB connection failed:', error.message);
-        process.exit(1);
-    }
-}
 
 // User Schema
 const userSchema = new mongoose.Schema({
