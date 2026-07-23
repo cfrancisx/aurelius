@@ -1,6 +1,6 @@
-const Conversation = require('./models/Conversation');
-const Message = require('./models/Message');
-const chatRoutes = require('./routes/chat');
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
+const chatRoutes = require('../routes/chat');
 require('dotenv').config();
 const express = require('express');
 const http = require('http');

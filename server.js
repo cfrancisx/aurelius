@@ -7,12 +7,24 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
 const multer = require('multer');
 const dotenv = require('dotenv');
+const http = require('http');
+const { Server } = require('socket.io');
 const { connectDatabase } = require('./database/mongodb');
 const { seedMongoDB } = require('./database/mongoSeed');
+const Message = require('./models/Message');
+const Conversation = require('./models/Conversation');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:3000', 'https://firstaurelius.co.uk'],
+        credentials: true
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Multer configuration for file uploads
@@ -42,7 +54,7 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://firstaurelius.co.uk'],
     credentials: true
 }));
 
@@ -68,7 +80,7 @@ app.use((req, res, next) => {
 });
 
 // Verify MongoDB URI is available
-const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://aurelius_admin:Admin12345@cluster0.3mottii.mongodb.net/?appName=Cluster0';
+const mongoUri = process.env.MONGODB_URI;
 if (!mongoUri) {
     console.error('❌ MONGODB_URI environment variable is not set!');
     process.exit(1);
@@ -93,6 +105,31 @@ app.use(session({
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Socket.io chat logic
+io.on('connection', (socket) => {
+    socket.on('joinConversation', (conversationId) => {
+        socket.join(conversationId);
+    });
+
+    socket.on('joinRepDashboard', () => {
+        socket.join('reps');
+    });
+
+    socket.on('sendMessage', async ({ conversationId, senderId, senderType, text }) => {
+        try {
+            const message = await Message.create({ conversationId, senderId, senderType, text });
+            await Conversation.findByIdAndUpdate(conversationId, { lastMessageAt: new Date() });
+
+            io.to(conversationId).emit('newMessage', message);
+            if (senderType === 'customer') {
+                io.to('reps').emit('newCustomerMessage', { conversationId, message });
+            }
+        } catch (err) {
+            console.error('Error saving message:', err);
+        }
+    });
+});
+
 // Database initialization and route setup
 (async () => {
     await connectDatabase();
@@ -103,10 +140,12 @@ app.use(express.static(path.join(__dirname, 'public')));
     const apiRoutes = require('./routes/apiRoutesMongo');
     const adminRoutes = require('./routes/adminRoutesMongo');
     const pageRoutes = require('./routes/pageRoutes');
+    const chatRoutes = require('./routes/chatRoutes');
     
     app.use('/auth', authRoutes());
     app.use('/api', apiRoutes());
     app.use('/api/admin', adminRoutes());
+    app.use('/api/chat', chatRoutes());
     app.use('/', pageRoutes);
     
     // Error handling middleware
@@ -121,7 +160,7 @@ app.use(express.static(path.join(__dirname, 'public')));
     });
 
     // Start server after routes are registered
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`🚀 Aurelius Bank running on https://localhost:${PORT}`);
         console.log(`📊 Admin Panel: https://localhost:${PORT}/admin`);
         console.log(`🏦 Customer Portal: https://localhost:${PORT}/login`);

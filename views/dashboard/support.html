@@ -328,83 +328,83 @@
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const socket = io('http://localhost:4000');
+    const socket = io();
 
-        const customerId = document.body.dataset.customerId || 'guest';
-        let conversationId = null;
+let conversationId = null;
+let customerId = null;
 
-        const bubble = document.getElementById('aurelius-chat-bubble');
-        const chatWindow = document.getElementById('aurelius-chat-window');
-        const closeBtn = document.getElementById('aurelius-chat-close');
-        const messagesEl = document.getElementById('aurelius-chat-messages');
-        const input = document.getElementById('aurelius-chat-input');
-        const sendBtn = document.getElementById('aurelius-chat-send');
+const bubble = document.getElementById('aurelius-chat-bubble');
+const chatWindow = document.getElementById('aurelius-chat-window');
+const closeBtn = document.getElementById('aurelius-chat-close');
+const messagesEl = document.getElementById('aurelius-chat-messages');
+const input = document.getElementById('aurelius-chat-input');
+const sendBtn = document.getElementById('aurelius-chat-send');
 
-        if (!bubble || !chatWindow || !closeBtn || !messagesEl || !input || !sendBtn) {
-            console.error('Chat UI elements missing');
-            return;
-        }
+bubble.addEventListener('click', async () => {
+  chatWindow.classList.remove('hidden');
+  if (!conversationId) {
+    await loadCustomerId();
+    if (customerId) await initConversation();
+  }
+});
 
-        bubble.addEventListener('click', async () => {
-            chatWindow.classList.remove('hidden');
-            if (!conversationId) await initConversation();
-        });
+closeBtn.addEventListener('click', () => {
+  chatWindow.classList.add('hidden');
+});
 
-        closeBtn.addEventListener('click', () => {
-            chatWindow.classList.add('hidden');
-        });
+// Pull the real logged-in customer's ID using the existing api.js session
+async function loadCustomerId() {
+  try {
+    const profile = await api.getProfile();
+    // adjust this field name to match whatever your /user-profile endpoint actually returns
+    customerId = profile.id;
 
-        async function initConversation() {
-            try {
-                const res = await fetch('http://localhost:4000/api/conversations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ customerId })
-                });
+    if (!customerId) {
+      console.error('Could not find customer ID in profile response:', profile);
+    }
+  } catch (err) {
+    console.error('Failed to load customer profile:', err);
+  }
+}
 
-                const convo = await res.json();
-                conversationId = convo._id;
+async function initConversation() {
+  const res = await fetch('/api/chat/conversations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customerId })
+  });
+  const convo = await res.json();
+  conversationId = convo._id;
 
-                socket.emit('joinConversation', conversationId);
+  socket.emit('joinConversation', conversationId);
 
-                const historyRes = await fetch(`http://localhost:4000/api/conversations/${conversationId}/messages`);
-                const history = await historyRes.json();
-                history.forEach(renderMessage);
-            } catch (err) {
-                console.error('Chat init failed:', err);
-            }
-        }
+  const historyRes = await fetch(`/api/chat/conversations/${conversationId}/messages`);
+  const history = await historyRes.json();
+  history.forEach(renderMessage);
+}
 
-        function renderMessage(msg) {
-            const div = document.createElement('div');
-            div.className = msg.senderType === 'customer' ? 'msg-mine' : 'msg-theirs';
-            div.textContent = msg.text;
-            messagesEl.appendChild(div);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
+function renderMessage(msg) {
+  const div = document.createElement('div');
+  div.className = msg.senderType === 'customer' ? 'msg-mine' : 'msg-theirs';
+  div.textContent = msg.text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
 
-        function sendMessage() {
-            const text = input.value.trim();
-            if (!text || !conversationId) return;
-            socket.emit('sendMessage', {
-                conversationId,
-                senderId: customerId,
-                senderType: 'customer',
-                text
-            });
-            input.value = '';
-        }
+function sendMessage() {
+  const text = input.value.trim();
+  if (!text || !conversationId) return;
+  socket.emit('sendMessage', { conversationId, senderId: customerId, senderType: 'customer', text });
+  input.value = '';
+}
 
-        sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-        socket.on('newMessage', (msg) => {
-            if (msg.conversationId === conversationId) renderMessage(msg);
-        });
-    });
+socket.on('newMessage', (msg) => {
+  if (msg.conversationId === conversationId) renderMessage(msg);
+});
+
 </script>
 
     <script src="/js/main.js"></script>
