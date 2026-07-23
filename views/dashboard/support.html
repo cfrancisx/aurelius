@@ -25,65 +25,83 @@
         </aside>
         <main class="main-content">
             <header class="dashboard-header">
-                </section>
+                <h1>Support</h1>
+            </header>
 
-        <section class="content">
-            <div class="container">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
-                    <div>
-                        <h2>Get in Touch</h2>
-                       <form id="contactForm" onsubmit="handleContactForm(event)">
-                            <div class="form-group">
-                                <label for="name">Your Name</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Your Email</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="subject">Subject</label>
-                                <input type="text" id="subject" name="subject" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="message">Message</label>
-                                <textarea id="message" name="message" rows="5" required></textarea>
-                            </div>
-                            <button type="submit" class="btn-primary">Send Message</button>
-                        </form>
-                    </div>
+            <section class="content">
+                <div class="container">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+                        <div>
+                            <h2>Get in Touch</h2>
+                            <form id="contactForm" onsubmit="handleContactForm(event)">
+                                <div class="form-group">
+                                    <label for="name">Your Name</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Your Email</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subject">Subject</label>
+                                    <input type="text" id="subject" name="subject" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Message</label>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Send Message</button>
+                            </form>
+                        </div>
 
-                    <div>
-                        <h2>Contact Information</h2>
-                        <div class="contact-info">
-                            <div class="info-item">
-                                <strong>📧 Email</strong>
-                                <p>support@aureliusbank.com</p>
-                            </div>
-                            <div class="info-item">
-                                <strong>📞 Phone</strong>
-                                <p>+44-161-BANK-911</p>
-                            </div>
-                            <div class="info-item">
-                                <strong>🏢 Address</strong>
-                                <p>33 Piccadilly<br>Manchester M1 1LQ,<br>United Kingdom</p>
-                            </div>
-                            <div class="info-item">
-                                <strong>⏰ Hours</strong>
-                                <p>Available 24/7 for online support</p>
+                        <div>
+                            <h2>Contact Information</h2>
+                            <div class="contact-info">
+                                <div class="info-item">
+                                    <strong>📧 Email</strong>
+                                    <p>support@aureliusbank.com</p>
+                                </div>
+                                <div class="info-item">
+                                    <strong>📞 Phone</strong>
+                                    <p>+44-161-BANK-911</p>
+                                </div>
+                                <div class="info-item">
+                                    <strong>🏢 Address</strong>
+                                    <p>33 Piccadilly<br>Manchester M1 1LQ,<br>United Kingdom</p>
+                                </div>
+                                <div class="info-item">
+                                    <strong>⏰ Hours</strong>
+                                    <p>Available 24/7 for online support</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </main>
+            </section>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2018 Aurelius Bank. All rights reserved.</p>
-        </div>
-    </footer>
+            <!-- Chat bubble -->
+            <div id="aurelius-chat-bubble">💬</div>
+
+            <!-- Chat window -->
+            <div id="aurelius-chat-window" class="hidden">
+                <div id="aurelius-chat-header">
+                    <span>Aurelius Support</span>
+                    <button id="aurelius-chat-close">✕</button>
+                </div>
+                <div id="aurelius-chat-messages"></div>
+                <div id="aurelius-chat-input-row">
+                    <input id="aurelius-chat-input" type="text" placeholder="Type a message..." />
+                    <button id="aurelius-chat-send">Send</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2018 Aurelius Bank. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
 
     <style>
         .page-header {
@@ -178,41 +196,207 @@
                 grid-template-columns: 1fr !important;
             }
         }
+
+        #aurelius-chat-bubble {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #0b3d2e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+        }
+
+        #aurelius-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            height: 440px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        #aurelius-chat-window.hidden { display: none; }
+
+        #aurelius-chat-header {
+            background: #0b3d2e;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        #aurelius-chat-header button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #aurelius-chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        .msg-mine, .msg-theirs {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .msg-mine {
+            background: #0b3d2e;
+            color: white;
+            margin-left: auto;
+        }
+
+        .msg-theirs {
+            background: #f0f0f0;
+            color: #222;
+        }
+
+        #aurelius-chat-input-row {
+            display: flex;
+            border-top: 1px solid #eee;
+        }
+
+        #aurelius-chat-input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        #aurelius-chat-input:focus { outline: none; }
+
+        #aurelius-chat-send {
+            border: none;
+            background: #0b3d2e;
+            color: white;
+            padding: 0 16px;
+            cursor: pointer;
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<script>
-    emailjs.init("0Hki70-QR3A5tcasE");
-</script>
     <script>
+        emailjs.init("0Hki70-QR3A5tcasE");
+
         function handleContactForm(event) {
-    event.preventDefault();
+            event.preventDefault();
 
-    const templateParams = {
-        from_name: document.getElementById('name').value,
-        from_email: document.getElementById('email').value,
-        subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value
-    };
+            const templateParams = {
+                from_name: document.getElementById('name').value,
+                from_email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
 
-    emailjs.send(
-        'service_jx96chb',
-        'template_lxauisd',
-        templateParams
-    )
-    .then(function(response) {
-        console.log('SUCCESS!', response);
-        alert('Message sent successfully!');
-        event.target.reset();
-    })
-    .catch(function(error) {
-        console.error('FAILED...', error);
-        alert('Failed to send message.');
-    });
-}
+            emailjs.send('service_jx96chb', 'template_lxauisd', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response);
+                    alert('Message sent successfully!');
+                    event.target.reset();
+                })
+                .catch(function(error) {
+                    console.error('FAILED...', error);
+                    alert('Failed to send message.');
+                });
+        }
     </script>
-    <script src="/js/api.js"></script>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:4000'); // point this to your deployed server later
+
+        // TODO: this still needs to read the real logged-in customer's ID —
+        // see api.js / dashboard.js, whichever one holds the session data
+        const customerId = getLoggedInCustomerId();
+
+        let conversationId = null;
+
+        const bubble = document.getElementById('aurelius-chat-bubble');
+        const chatWindow = document.getElementById('aurelius-chat-window');
+        const closeBtn = document.getElementById('aurelius-chat-close');
+        const messagesEl = document.getElementById('aurelius-chat-messages');
+        const input = document.getElementById('aurelius-chat-input');
+        const sendBtn = document.getElementById('aurelius-chat-send');
+
+        bubble.addEventListener('click', async () => {
+            chatWindow.classList.remove('hidden');
+            if (!conversationId) await initConversation();
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatWindow.classList.add('hidden');
+        });
+
+        async function initConversation() {
+            const res = await fetch('http://localhost:4000/api/conversations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customerId })
+            });
+            const convo = await res.json();
+            conversationId = convo._id;
+
+            socket.emit('joinConversation', conversationId);
+
+            const historyRes = await fetch(`http://localhost:4000/api/conversations/${conversationId}/messages`);
+            const history = await historyRes.json();
+            history.forEach(renderMessage);
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = msg.senderType === 'customer' ? 'msg-mine' : 'msg-theirs';
+            div.textContent = msg.text;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = input.value.trim();
+            if (!text || !conversationId) return;
+            socket.emit('sendMessage', { conversationId, senderId: customerId, senderType: 'customer', text });
+            input.value = '';
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        socket.on('newMessage', (msg) => {
+            if (msg.conversationId === conversationId) renderMessage(msg);
+        });
+
+        function getLoggedInCustomerId() {
+            // TODO: replace with the real session/auth lookup once we see api.js / dashboard.js
+            return document.body.dataset.customerId;
+        }
+    </script>
+
+    <script src="/js/main.js"></script>
     <script src="/js/dashboard.js"></script>
 </body>
 </html>

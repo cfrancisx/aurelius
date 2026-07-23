@@ -266,8 +266,7 @@ td {
 
 tr:hover {
     background: var(--bg-secondary);
-}
-    font-weight: 700;
+     font-weight: 700;
     color: var(--gold);
     text-decoration: none;
 }
