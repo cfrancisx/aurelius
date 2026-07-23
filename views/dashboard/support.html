@@ -93,6 +93,9 @@
                     <button id="aurelius-chat-send">Send</button>
                 </div>
             </div>
+
+            <!-- Chat bubble -->
+            <div id="aurelius-chat-bubble">💬</div>
         </main>
 
         <footer class="footer">
@@ -406,10 +409,8 @@ socket.on('newMessage', (msg) => {
 });
 
 </script>
-
+    <script src="/js/api.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/dashboard.js"></script>
-    <!-- Chat bubble -->
-            <div id="aurelius-chat-bubble">💬</div>
 </body>
 </html>
