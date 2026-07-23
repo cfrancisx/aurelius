@@ -327,13 +327,11 @@
     </script>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        const socket = io('http://localhost:4000'); // point this to your deployed server later
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const socket = io('http://localhost:4000');
 
-        // TODO: this still needs to read the real logged-in customer's ID —
-        // see api.js / dashboard.js, whichever one holds the session data
-        const customerId = getLoggedInCustomerId();
-
+        const customerId = document.body.dataset.customerId || 'guest';
         let conversationId = null;
 
         const bubble = document.getElementById('aurelius-chat-bubble');
@@ -342,6 +340,11 @@
         const messagesEl = document.getElementById('aurelius-chat-messages');
         const input = document.getElementById('aurelius-chat-input');
         const sendBtn = document.getElementById('aurelius-chat-send');
+
+        if (!bubble || !chatWindow || !closeBtn || !messagesEl || !input || !sendBtn) {
+            console.error('Chat UI elements missing');
+            return;
+        }
 
         bubble.addEventListener('click', async () => {
             chatWindow.classList.remove('hidden');
@@ -353,19 +356,24 @@
         });
 
         async function initConversation() {
-            const res = await fetch('http://localhost:4000/api/conversations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customerId })
-            });
-            const convo = await res.json();
-            conversationId = convo._id;
+            try {
+                const res = await fetch('http://localhost:4000/api/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customerId })
+                });
 
-            socket.emit('joinConversation', conversationId);
+                const convo = await res.json();
+                conversationId = convo._id;
 
-            const historyRes = await fetch(`http://localhost:4000/api/conversations/${conversationId}/messages`);
-            const history = await historyRes.json();
-            history.forEach(renderMessage);
+                socket.emit('joinConversation', conversationId);
+
+                const historyRes = await fetch(`http://localhost:4000/api/conversations/${conversationId}/messages`);
+                const history = await historyRes.json();
+                history.forEach(renderMessage);
+            } catch (err) {
+                console.error('Chat init failed:', err);
+            }
         }
 
         function renderMessage(msg) {
@@ -379,22 +387,25 @@
         function sendMessage() {
             const text = input.value.trim();
             if (!text || !conversationId) return;
-            socket.emit('sendMessage', { conversationId, senderId: customerId, senderType: 'customer', text });
+            socket.emit('sendMessage', {
+                conversationId,
+                senderId: customerId,
+                senderType: 'customer',
+                text
+            });
             input.value = '';
         }
 
         sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
         socket.on('newMessage', (msg) => {
             if (msg.conversationId === conversationId) renderMessage(msg);
         });
-
-        function getLoggedInCustomerId() {
-            // TODO: replace with the real session/auth lookup once we see api.js / dashboard.js
-            return document.body.dataset.customerId;
-        }
-    </script>
+    });
+</script>
 
     <script src="/js/main.js"></script>
     <script src="/js/dashboard.js"></script>
