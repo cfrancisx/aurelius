@@ -251,6 +251,9 @@ router.get('/admin/settings', authenticateToken, (req, res) => {
     res.sendFile(path.join(__dirname, '../views/admin/settings.html'));
 });
 
+router.get('/admin/support', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/dashboard/support-rep.html'));
+});
 // 404 page
 router.get('/404', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/404.html'));

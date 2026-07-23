@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Care - Aurelius Bank</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">AURELIUS BANK</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/overview">📊 Overview</a></li>
+                <li><a href="/admin/customers">👥 Customers</a></li>
+                <li><a href="/admin/transactions">💸 Transactions</a></li>
+                <li><a href="/admin/support" class="active">💬 Customer Care</a></li>
+                <li><a href="/admin/audit-logs">📄 Audit Logs</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Customer Care</h1>
+            </header>
+
+            <section class="content">
+                <div id="rep-dashboard">
+                    <div id="convo-list"></div>
+                    <div id="convo-panel">
+                        <div id="convo-header">Select a conversation</div>
+                        <div id="convo-messages"></div>
+                        <div id="convo-input-row">
+                            <input id="convo-input" type="text" placeholder="Reply to customer..." />
+                            <button id="convo-send">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <style>
+        #rep-dashboard {
+            display: flex;
+            height: calc(100vh - 140px);
+            border: 1px solid #eee;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #convo-list {
+            width: 260px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .convo-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .convo-item:hover { background: #f0f0f0; }
+        .convo-item.active { background: #e8f0ea; font-weight: 600; }
+        #convo-panel { flex: 1; display: flex; flex-direction: column; }
+        #convo-header { padding: 14px 16px; border-bottom: 1px solid #eee; font-weight: 600; }
+        #convo-messages { flex: 1; padding: 16px; overflow-y: auto; }
+        .msg-mine, .msg-theirs {
+            max-width: 60%; padding: 8px 12px; border-radius: 10px;
+            margin-bottom: 8px; line-height: 1.4; font-size: 14px;
+        }
+        .msg-mine { background: #0b3d2e; color: white; margin-left: auto; }
+        .msg-theirs { background: #f0f0f0; color: #222; }
+        #convo-input-row { display: flex; border-top: 1px solid #eee; }
+        #convo-input { flex: 1; border: none; padding: 12px; font-size: 14px; }
+        #convo-input:focus { outline: none; }
+        #convo-send { border: none; background: #0b3d2e; color: white; padding: 0 20px; cursor: pointer; }
+    </style>
+
+    <script src="/js/api.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Client-side auth check — mirrors the pattern used on customer dashboard pages
+(function checkAdminAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/admin-login';
+        return;
+    }
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.role !== 'admin') {
+            window.location.href = '/login';
+        }
+    } catch (err) {
+        window.location.href = '/admin-login';
+    }
+})();
+        const socket = io();
+        let activeConversationId = null;
+        let repId = null;
+
+        function getRepIdFromToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.id || null;
+            } catch (err) {
+                console.error('Failed to decode token:', err);
+                return null;
+            }
+        }
+
+        async function init() {
+            repId = getRepIdFromToken();
+            if (!repId) {
+                console.error('Could not determine rep ID — make sure you are logged in as admin');
+                return;
+            }
+            socket.emit('joinRepDashboard');
+            await loadConversations();
+        }
+
+        async function loadConversations() {
+            const res = await fetch('/api/chat/conversations');
+            const conversations = await res.json();
+            const listEl = document.getElementById('convo-list');
+            listEl.innerHTML = '';
+            conversations.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'convo-item' + (c._id === activeConversationId ? ' active' : '');
+                item.textContent = `Customer ${c.customerId.toString().slice(-6)}`;
+                item.addEventListener('click', () => openConversation(c._id));
+                listEl.appendChild(item);
+            });
+        }
+
+        async function openConversation(id) {
+            activeConversationId = id;
+            document.getElementById('convo-header').textContent = `Conversation ${id.slice(-6)}`;
+            socket.emit('joinConversation', id);
+
+            const res = await fetch(`/api/chat/conversations/${id}/messages`);
+            const messages = await res.json();
+            const messagesEl = document.getElementById('convo-messages');
+            messagesEl.innerHTML = '';
+            messages.forEach(renderMessage);
+            loadConversations();
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = msg.senderType === 'rep' ? 'msg-mine' : 'msg-theirs';
+            div.textContent = msg.text;
+            document.getElementById('convo-messages').appendChild(div);
+            const messagesEl = document.getElementById('convo-messages');
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function reply() {
+            const input = document.getElementById('convo-input');
+            const text = input.value.trim();
+            if (!text || !activeConversationId) return;
+            socket.emit('sendMessage', {
+                conversationId: activeConversationId,
+                senderId: repId,
+                senderType: 'rep',
+                text
+            });
+            input.value = '';
+        }
+
+        document.getElementById('convo-send').addEventListener('click', reply);
+        document.getElementById('convo-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') reply();
+        });
+
+        socket.on('newMessage', (msg) => {
+            if (msg.conversationId === activeConversationId) renderMessage(msg);
+        });
+
+        socket.on('newCustomerMessage', () => loadConversations());
+
+        init();
+    </script>
+</body>
+</html>
