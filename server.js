@@ -143,9 +143,9 @@ io.on('connection', (socket) => {
     const chatRoutes = require('./routes/chatRoutes');
     
     app.use('/auth', authRoutes());
-    app.use('/api', apiRoutes());
-    app.use('/api/admin', adminRoutes());
     app.use('/api/chat', chatRoutes());
+    app.use('/api/admin', adminRoutes());
+    app.use('/api', apiRoutes());
     app.use('/', pageRoutes);
     
     // Error handling middleware
