@@ -45,19 +45,12 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
         }
 
-        .action-button.credit {
-            background: linear-gradient(135deg, #00AA62 0%, #0D8B4A 100%);
-            border-top: 4px solid #00AA62;
-        }
-
-        .action-button.debit {
-            background: linear-gradient(135deg, #FF6B35 0%, #E85A1E 100%);
-            border-top: 4px solid #FF6B35;
-        }
-
+        /* All three now use the same blue, as requested */
+        .action-button.credit,
+        .action-button.debit,
         .action-button.set {
-            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
-            border-top: 4px solid #7C3AED;
+            background: linear-gradient(135deg, #003D82 0%, #0052A3 100%);
+            border-top: 4px solid #0052A3;
         }
 
         .action-icon {
@@ -183,6 +176,7 @@
                 <a href="/admin/kyc">✅ KYC Verification</a>
                 <a href="/admin/loans">🏦 Loan Approval</a>
                 <a href="/admin/audit-logs">📝 Audit Logs</a>
+                <a href="/admin/support">💬 Customer Care</a>
             </nav>
         </aside>
         
@@ -201,17 +195,17 @@
             <div class="action-buttons-group">
                 <button onclick="showCreditModal()" class="action-button credit">
                     <span class="action-icon">➕</span>
-                    <div class="action-label">Proceed</div>
+                    <div class="action-label">Credit Account</div>
                     <div class="action-desc">Add funds to account</div>
                 </button>
                 <button onclick="showDebitModal()" class="action-button debit">
                     <span class="action-icon">➖</span>
-                    <div class="action-label">Proceed</div>
+                    <div class="action-label">Debit Account</div>
                     <div class="action-desc">Remove funds from account</div>
                 </button>
                 <button onclick="showSetBalanceModal()" class="action-button set">
                     <span class="action-icon">⚙️</span>
-                    <div class="action-label">Proceed</div>
+                    <div class="action-label">Set Balance</div>
                     <div class="action-desc">Set exact balance amount</div>
                 </button>
             </div>
@@ -324,116 +318,6 @@
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Set Balance</button>
                 </form>
             </div>
-        </div>
-    </div>
-    
-    <script src="/js/api.js"></script>
-    <script src="/js/admin.js"></script>
-</body>
-</html>
-            
-            <!-- Balance Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Adjustments Today</h3>
-                    <div class="value" id="totalAdjustments">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Credits</h3>
-                    <div class="value" id="totalCredits">0</div>
-                    <small id="creditAmount">$0</small>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Debits</h3>
-                    <div class="value" id="totalDebits">0</div>
-                    <small id="debitAmount">$0</small>
-                </div>
-            </div>
-            
-            <!-- Balance Actions -->
-            <div class="card">
-                <h3>Balance Actions</h3>
-                <div class="grid grid-3">
-                    <button onclick="showCreditModal()" class="btn btn-primary">Credit Account</button>
-                    <button onclick="showDebitModal()" class="btn btn-warning">Debit Account</button>
-                    <button onclick="showSetBalanceModal()" class="btn btn-info">Set Exact Balance</button>
-                </div>
-            </div>
-            
-            <!-- Recent Adjustments -->
-            <div class="card">
-                <h3>Recent Balance Adjustments</h3>
-                <div id="recentAdjustments" class="adjustments-list"></div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- Credit Modal -->
-    <div id="creditModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('creditModal')">&times;</span>
-            <h3>Credit Account</h3>
-            <form id="creditForm">
-                <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="creditAccount" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Amount</label>
-                    <input type="number" id="creditAmount" class="form-control" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Reason</label>
-                    <textarea id="creditReason" class="form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Process Credit</button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Debit Modal -->
-    <div id="debitModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('debitModal')">&times;</span>
-            <h3>Debit Account</h3>
-            <form id="debitForm">
-                <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="debitAccount" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Amount</label>
-                    <input type="number" id="debitAmount" class="form-control" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Reason</label>
-                    <textarea id="debitReason" class="form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Process Debit</button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Set Balance Modal -->
-    <div id="setBalanceModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('setBalanceModal')">&times;</span>
-            <h3>Set Exact Balance</h3>
-            <form id="setBalanceForm">
-                <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="setBalanceAccount" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>New Balance</label>
-                    <input type="number" id="newBalance" class="form-control" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Reason</label>
-                    <textarea id="setBalanceReason" class="form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Set Balance</button>
-            </form>
         </div>
     </div>
     
