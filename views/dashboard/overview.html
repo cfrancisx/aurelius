@@ -526,20 +526,17 @@
                 document.getElementById('kycStatusContainer').innerHTML = kycHTML;
             } catch (error) {
                 console.error('Error loading KYC status:', error);
-                // Don't show error to user, just skip KYC section
             }
         }
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async () => {
-            // Setup logout
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
             });
 
             try {
-                // Load KYC status
                 await loadKYCStatus();
 
                 const accounts = await api.getAccounts();
@@ -567,16 +564,15 @@
                 document.getElementById('accountsGrid').innerHTML = accountsHTML;
                 document.getElementById('totalNetWorth').textContent = '£' + totalBalance.toFixed(2);
 
-                // Load transactions
+                // Load transactions — scoped to this user's account
                 const myAccountNumbers = new Set(accounts.map(a => a.account_number));
-                const txns = await api.getTransactions();
+                const txns = await api.getTransactions(accounts[0]?.account_number);
                 let txnHTML = '';
 
                 if (txns && txns.length > 0) {
                     txns.slice(0, 5).forEach(txn => {
                         const date = new Date(txn.created_at).toLocaleDateString();
                         const amount = parseFloat(txn.amount || 0).toFixed(2);
-                        // Money is incoming unless one of the user's own accounts is the sender.
                         const isCredit = !myAccountNumbers.has(txn.sender_account);
                         
                         txnHTML += `
@@ -602,29 +598,5 @@
             }
         });
     </script>
-</body>
-</html>
-                <div class="card">
-                    <h3>Recent Transactions</h3>
-                    <div class="transaction-table">
-                        <table>
-                            <thead>
-                                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr>
-                            </thead>
-                            <tbody id="transactionsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Spending Overview</h3>
-                    <canvas id="spendingChart" height="250"></canvas>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <script src="/js/api.js"></script>
-    <script src="/js/dashboard.js"></script>
 </body>
 </html>
