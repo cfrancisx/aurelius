@@ -49,8 +49,9 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Generate Statement</button>
+                    <button type="submit" class="btn btn-primary" id="generateBtn">Generate Statement</button>
                 </form>
+                <div id="statementError" style="color: #C62828; margin-top: 1rem; display: none;"></div>
             </div>
             
             <div id="statementResult" class="card" style="display: none;">
@@ -60,10 +61,10 @@
                 </div>
                 
                 <div class="statement-summary">
-                    <div>Opening Balance: <strong id="openingBalance">$0</strong></div>
-                    <div>Closing Balance: <strong id="closingBalance">$0</strong></div>
-                    <div>Total Credits: <strong id="totalCredits">$0</strong></div>
-                    <div>Total Debits: <strong id="totalDebits">$0</strong></div>
+                    <div>Opening Balance: <strong id="openingBalance">£0</strong></div>
+                    <div>Closing Balance: <strong id="closingBalance">£0</strong></div>
+                    <div>Total Credits: <strong id="totalCredits">£0</strong></div>
+                    <div>Total Debits: <strong id="totalDebits">£0</strong></div>
                 </div>
                 
                 <div class="transaction-table">
@@ -102,15 +103,31 @@
         
         document.getElementById('statementForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const errorEl = document.getElementById('statementError');
+            const generateBtn = document.getElementById('generateBtn');
+            errorEl.style.display = 'none';
+            document.getElementById('statementResult').style.display = 'none';
             
             const accountNumber = document.getElementById('accountSelect').value;
             const fromDate = document.getElementById('fromDate').value;
             const toDate = document.getElementById('toDate').value;
-            
-            const statement = await api.request(`/user/statement?account_number=${accountNumber}&from_date=${fromDate}&to_date=${toDate}`);
-            currentStatement = statement;
-            
-            displayStatement(statement);
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+
+            try {
+                const statement = await api.request(`/user/statement?account_number=${accountNumber}&from_date=${fromDate}&to_date=${toDate}`);
+                currentStatement = statement;
+                displayStatement(statement);
+            } catch (error) {
+                console.error('Error generating statement:', error);
+                errorEl.textContent = 'Failed to generate statement. Please try again or contact support if this continues.';
+                errorEl.style.display = 'block';
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Statement';
+            }
         });
         
         function displayStatement(statement) {
@@ -149,7 +166,7 @@
             document.getElementById('openingBalance').textContent = `£${statement.account.ledger_balance.toLocaleString()}`;
             document.getElementById('closingBalance').textContent = `£${runningBalance.toLocaleString()}`;
             document.getElementById('totalCredits').textContent = `£${totalCredits.toLocaleString()}`;
-            document.getElementById('totalDebits').textContent = `$${totalDebits.toLocaleString()}`;
+            document.getElementById('totalDebits').textContent = `£${totalDebits.toLocaleString()}`;
         }
         
         function downloadStatement() {
@@ -178,7 +195,7 @@
                         <p>Period: ${currentStatement.period.from_date} to ${currentStatement.period.to_date}</p>
                     </div>
                     <div class="summary">
-                        <p>Opening Balance: $${currentStatement.account.ledger_balance.toLocaleString()}</p>
+                        <p>Opening Balance: £${currentStatement.account.ledger_balance.toLocaleString()}</p>
                         <p>Closing Balance: ${document.getElementById('closingBalance').innerHTML}</p>
                         <p>Total Credits: ${document.getElementById('totalCredits').innerHTML}</p>
                         <p>Total Debits: ${document.getElementById('totalDebits').innerHTML}</p>

@@ -410,10 +410,11 @@
         });
 
         async function loadTransferHistory() {
-            try {
-                if (accounts.length === 0) return;
+    try {
+        if (accounts.length === 0) return;
 
-                const response = await fetch('/api/transactions', {
+        const accountNumber = accounts[0].account_number;
+        const response = await fetch(`/api/transactions?account_number=${encodeURIComponent(accountNumber)}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }

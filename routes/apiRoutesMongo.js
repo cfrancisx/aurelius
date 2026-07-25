@@ -31,6 +31,7 @@ module.exports = function() {
     router.post('/transfer', (req, res) => userController.transfer(req, res));
     router.get('/transactions', (req, res) => userController.getTransactions(req, res));
     router.get('/balance', (req, res) => userController.getBalance(req, res));
+    router.get('/user/statement', (req, res) => userController.getStatement(req, res));
     
     // KYC upload with file handling
     router.post('/kyc/upload', (req, res, next) => {

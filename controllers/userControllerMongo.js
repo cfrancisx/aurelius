@@ -169,6 +169,54 @@ class UserController {
         }
     }
 
+    async getStatement(req, res) {
+    try {
+        const userId = req.user.id;
+        const { account_number, from_date, to_date } = req.query;
+
+        if (!account_number || !from_date || !to_date) {
+            return res.status(400).json({ error: 'account_number, from_date, and to_date are required' });
+        }
+
+        // Confirm this account actually belongs to the logged-in user —
+        // never trust the account_number query param on its own.
+        const account = await Account.findOne({ account_number, user_id: userId });
+        if (!account) {
+            return res.status(404).json({ error: 'Account not found' });
+        }
+
+        // Include the full end day (23:59:59) so transactions on the "to" date are included.
+        const startDate = new Date(from_date);
+        const endDate = new Date(to_date);
+        endDate.setHours(23, 59, 59, 999);
+
+        const transactions = await Transaction.find({
+            $or: [
+                { sender_account: account_number },
+                { receiver_account: account_number }
+            ],
+            created_at: { $gte: startDate, $lte: endDate }
+        }).sort({ created_at: 1 }); // oldest first, so running balance math reads naturally
+
+        res.json({
+            account: {
+                account_number: account.account_number,
+                ledger_balance: account.ledger_balance,
+                available_balance: account.available_balance,
+                currency: account.currency
+            },
+            period: {
+                from_date,
+                to_date
+            },
+            transactions
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to generate statement' });
+    }
+}
+
     async getBalance(req, res) {
         try {
             const accountNumber = req.query.account_number;
