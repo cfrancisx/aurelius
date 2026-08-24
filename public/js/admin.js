@@ -1,4 +1,11 @@
 // Admin Dashboard
+const hamburger = document.getElementById("hamburger");
+const sidebar = document.querySelector(".admin-sidebar");
+
+hamburger.addEventListener("click", () => {
+    sidebar.classList.toggle("open")
+})
+
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
     if (!token) {

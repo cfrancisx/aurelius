@@ -7,15 +7,39 @@
 }
 
 /* Sidebar Navigation */
-.admin-sidebar {
-    width: 260px;
-    background: var(--primary);
-    color: white;
-    position: fixed;
-    height: 100vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-md);
+.hamburger {
+    display: none;
 }
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        font-size: 28px;
+        background: none;
+        cursor: pointer;
+    }
+    .admin-sidebar {
+        width: 260px;
+        background: white;
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        height: 100vh;
+        box-shadow: var(--shadow-sm);
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+}
+
 
 .admin-sidebar .logo {
     padding: 1.5rem;
@@ -60,8 +84,8 @@
 /* Main Content Area */
 .admin-main {
     flex: 1;
-    margin-left: 260px;
-    padding: 2rem;
+    margin-left: 0px;
+    padding: 1rem;
 }
 
 .admin-header {
