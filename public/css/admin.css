@@ -24,7 +24,7 @@
     }
     .admin-sidebar {
         width: 260px;
-        background: white;
+        background: rgb(4, 113, 255);
         border-right: 1px solid var(--border-color);
         position: fixed;
         height: 100vh;
@@ -92,9 +92,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 .admin-header h1 {
@@ -354,6 +362,12 @@
     gap: 0.5rem;
 }
 
+@media (max-width: 600px) {
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+}
+
 .btn-sm {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
@@ -376,6 +390,12 @@
     padding: 2rem;
     box-shadow: var(--shadow-sm);
     margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+    .form-section {
+        padding: 1rem;
+    }
 }
 
 .form-grid {
@@ -516,6 +536,17 @@
     border-bottom: 1px solid var(--border-color);
 }
 
+@media (max-width: 600px) {
+    .customer-info-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .customer-info-label {
+        min-width: 0;
+    }
+}
+
 .customer-info-row:last-child {
     border-bottom: none;
 }
@@ -538,6 +569,13 @@
     box-shadow: var(--shadow-sm);
     margin-bottom: 2rem;
 }
+
+@media (max-width: 600px) {
+    .balance-section {
+        padding: 1rem;
+    }
+}
+
 
 .balance-display {
     display: grid;
@@ -611,6 +649,13 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
+
+@media (max-width: 600px) {
+    .card {
+        padding: 1rem;
+    }
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -712,5 +757,102 @@
     .action-buttons-group,
     .charts-grid {
         grid-template-columns: 1fr !important;
+    }
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .admin-main {
+        padding: 1.5rem;
+    }
+
+    .admin-header {
+        gap: 1rem;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 0.75rem;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    /* Hide desktop sidebar */
+    .admin-sidebar {
+        display: none;
+    }
+
+    /* Full width content */
+    .admin-main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    /* Header */
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Forms */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tables */
+    .table-body {
+        overflow-x: auto;
+    }
+
+    .admin-table {
+        min-width: 700px;
+    }
+
+    /* Modal */
+    .modal-content {
+        width: 95%;
+        max-width: none;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    /* Smaller cards */
+    .card,
+    .form-section,
+    .balance-section {
+        padding: 1rem;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+
+    /* Customer information */
+    .customer-info-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .customer-info-label {
+        min-width: 0;
+    }
+
+    /* Balance amounts */
+    .balance-amount {
+        font-size: 1.75rem;
     }
 }
