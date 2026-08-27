@@ -1,10 +1,17 @@
 // Admin Dashboard
+// FIX: hamburger button only exists on the main dashboard page. Without this
+// guard, hamburger.addEventListener() throws on every other admin page
+// (e.g. balance-management), which halts the rest of this script and means
+// DOMContentLoaded -> setupAdminEventListeners() never runs, so form submit
+// handlers (credit/debit/set balance) never get attached at all.
 const hamburger = document.getElementById("hamburger");
 const sidebar = document.querySelector(".admin-sidebar");
 
-hamburger.addEventListener("click", () => {
-    sidebar.classList.toggle("open")
-})
+if (hamburger && sidebar) {
+    hamburger.addEventListener("click", () => {
+        sidebar.classList.toggle("open")
+    })
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
@@ -119,6 +126,10 @@ function updateCustomersTable(customers) {
     `).join('');
 }
 
+// NOTE: this function writes into #creditAmount and #debitAmount, which are the
+// *stats display* spans. These IDs previously collided with the credit/debit
+// FORM input fields (see fix below in handleCreditAccount/handleDebitAccount),
+// which was the root cause of the "add balance" button silently failing.
 function updateBalanceStats(stats) {
     if (!stats.stats) return;
 
@@ -204,7 +215,9 @@ async function handleCustomerSearch(e) {
 async function handleCreditAccount(e) {
     e.preventDefault();
     const accountNumber = document.getElementById('creditAccount').value.trim();
-    const amount = parseFloat(document.getElementById('creditAmount').value);
+    // FIX: was document.getElementById('creditAmount'), which collided with the
+    // stats display span of the same ID and always returned NaN for .value.
+    const amount = parseFloat(document.getElementById('creditFormAmount').value);
     const reason = document.getElementById('creditReason').value.trim();
     
     // Validation
@@ -232,7 +245,8 @@ async function handleCreditAccount(e) {
 async function handleDebitAccount(e) {
     e.preventDefault();
     const accountNumber = document.getElementById('debitAccount').value.trim();
-    const amount = parseFloat(document.getElementById('debitAmount').value);
+    // FIX: was document.getElementById('debitAmount'), same collision as above.
+    const amount = parseFloat(document.getElementById('debitFormAmount').value);
     const reason = document.getElementById('debitReason').value.trim();
     
     // Validation

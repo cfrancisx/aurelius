@@ -257,7 +257,11 @@
                     </div>
                     <div class="form-group">
                         <label>Amount to Credit</label>
-                        <input type="number" id="creditAmount" class="form-control" step="0.01" required placeholder="0.00">
+                        <!-- FIX: was id="creditAmount", which collided with the
+                             stats display span of the same ID elsewhere on the
+                             site, causing getElementById to grab the wrong
+                             element and .value to be undefined. -->
+                        <input type="number" id="creditFormAmount" class="form-control" step="0.01" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label>Reason</label>
@@ -283,7 +287,8 @@
                     </div>
                     <div class="form-group">
                         <label>Amount to Debit</label>
-                        <input type="number" id="debitAmount" class="form-control" step="0.01" required placeholder="0.00">
+                        <!-- FIX: was id="debitAmount", same collision as above. -->
+                        <input type="number" id="debitFormAmount" class="form-control" step="0.01" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label>Reason</label>
